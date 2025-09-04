@@ -37,7 +37,7 @@
 
   const HTML = `
     <div id="time-container">
-      <h3>Yume's Events Team Message Maker</h3>
+      <h1>Yume's Events Team Message Maker</h1>
       <h3>Type Your Message (Mentions Added Automatically)</h3>
       <textarea id="userMessage" placeholder="Write your message here..."></textarea>
       <h4>Final Message:</h4>
