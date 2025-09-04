@@ -36,6 +36,7 @@
 
   const HTML = `
     <div id="time-container">
+      <h1>Events Team Mention Maker</h1>
       <h3>Type Your Message (Mentions Added Automatically)</h3>
       <textarea id="userMessage" placeholder="Write your message here..."></textarea>
       <h4>Final Message:</h4>
