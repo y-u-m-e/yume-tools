@@ -27,7 +27,7 @@
   const STYLE = `
     /* Scoped to #time-container to match your original */
     #time-container { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 20px auto; text-align: center; }
-    #time-container h1 { margin-bottom: 30px; }
+    #time-container h1 { margin-bottom: 75px; }
     #time-container h3, #time-container h4 { margin-bottom: 15px; }
     #time-container textarea { width: 100%; height: 100px; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; resize: none; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; }
     #time-container #output { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; white-space: pre-wrap; min-height: 50px; font-family: 'Segoe UI', sans-serif; }
