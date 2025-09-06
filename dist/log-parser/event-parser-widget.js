@@ -1,4 +1,4 @@
-/* event-parser-widget.js — UMD build for Carrd + jsDelivr
+/* event-parser-widget.js
  *
  * Features:
  * - Same UI/behavior as your original embed (Event Name/Time/Notes, paste log, Extract Names, Copy, Webhook send)
@@ -15,6 +15,8 @@
  *   EventParserWidget.mount('#event-parser-root', { webhook: 'https://discord-relay.itai.app/' });
  * </script>
  */
+
+// UMD wrapper -> used to be browser agnostic
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
     define([], factory);
@@ -49,6 +51,12 @@
     </div>
   `;
 
+    /**
+    * injectStyles(doc)
+    * -----------------
+    * Adds the widget's CSS rules to the <head> of the page.
+    * Uses a unique ID so it only injects once, even if you mount multiple widgets.
+    */
   function injectStyles(doc) {
     if (doc.getElementById(CSS_ID)) return; // once
     const style = doc.createElement('style');
@@ -57,6 +65,13 @@
     doc.head.appendChild(style);
   }
 
+    /**
+    * parseNamesFromLog(text)
+    * -----------------------
+    * Parses a pasted event log and extracts the "Name" column.
+    * Looks for a code-fenced table starting with "Name | Time | Late".
+    * Returns an array of names until it hits the closing ``` fence.
+    */
   function parseNamesFromLog(text) {
     const nameSectionRegex = /```[\s\S]*?Name\s*\|\s*Time\s*\|\s*Late\s*\n/;
     const match = nameSectionRegex.exec(text);
@@ -76,6 +91,13 @@
     return names;
   }
 
+    /**
+    * sendToWebhook(url, body)
+    * ------------------------
+    * Sends the parsed event data to a webhook endpoint (e.g., Discord relay).
+    * Makes a POST request with JSON body.
+    * Resolves with the response text if successful; rejects on error.
+    */
   function sendToWebhook(url, body) {
     return fetch(url, {
       method: 'POST',
@@ -87,6 +109,14 @@
     });
   }
 
+    /**
+    * wire(host, opts)
+    * ----------------
+    * The main setup function:
+    * - Finds all DOM elements inside the widget container.
+    * - Defines helper functions to build Discord embeds, extract names, copy output.
+    * - Attaches event listeners to the buttons.
+    */
   function wire(host, opts) {
     const q = (sel) => host.querySelector(sel);
     const eventNameEl = q('#eventName');
@@ -99,6 +129,13 @@
 
     const webhookUrl = (opts && opts.webhook) || 'https://discord-relay.itai.app/';
 
+
+    /**
+     * buildEmbed(names, eventName, eventTime, eventNotes)
+     * ---------------------------------------------------
+     * Creates a Discord-compatible embed payload object,
+     * including event details and attendance list.
+     */
     function buildEmbed(names, eventName, eventTime, eventNotes) {
       return {
         username: 'Events Logger TESTING 1.0.0',
@@ -119,6 +156,15 @@
       };
     }
 
+    /**
+     * extractNames()
+     * --------------
+     * Handler for "Extract Names" button:
+     * - Reads inputs and log text.
+     * - Extracts names using parseNamesFromLog().
+     * - Builds a formatted summary and shows it in the output textarea.
+     * - Sends the same info to the webhook in the background.
+     */
     function extractNames() {
       const names = parseNamesFromLog(inputTextEl.value || '');
       const eventName = (eventNameEl.value || '').trim();
@@ -135,6 +181,14 @@
         .catch(err => console.error('🚨 Webhook error:', err));
     }
 
+
+    /**
+     * copyToClipboard()
+     * -----------------
+     * Handler for "Copy to Clipboard" button:
+     * - Copies the formatted output to the user’s clipboard.
+     * - Uses the modern Clipboard API if available, else falls back to execCommand.
+     */
     function copyToClipboard() {
       const textToCopy = outputNamesEl.value || '';
       if (!navigator.clipboard) {
@@ -153,6 +207,18 @@
     copyBtn.addEventListener('click', copyToClipboard);
   }
 
+  /**
+   * mount(selectorOrEl, opts)
+   * -------------------------
+   * Public API function you call to render the widget.
+   * - Finds the target container (by selector or element).
+   * - Injects styles if not already present.
+   * - Inserts the HTML structure.
+   * - Calls wire() to attach functionality.
+   *
+   * Example:
+   *   EventParserWidget.mount('#event-parser-root', { webhook: 'https://my-relay.url' });
+   */
   function mount(selectorOrEl, opts) {
     const host = (typeof selectorOrEl === 'string') ? document.querySelector(selectorOrEl) : selectorOrEl;
     if (!host) return;
