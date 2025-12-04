@@ -73,9 +73,11 @@
     * Returns an array of names until it hits the closing ``` fence.
     */
   function parseNamesFromLog(text) {
+    const names = [];
+
+    // Format 1: Code-fenced table with "Name | Time | Late"
     const nameSectionRegex = /```[\s\S]*?Name\s*\|\s*Time\s*\|\s*Late\s*\n/;
     const match = nameSectionRegex.exec(text);
-    const names = [];
     if (match) {
       const rest = text.slice(match.index + match[0].length);
       const lines = rest.split('\n');
@@ -87,7 +89,26 @@
           if (candidate && candidate !== 'Name') names.push(candidate);
         }
       }
+      return names;
     }
+
+    // Format 2: "Group attendance (N)" followed by "Name - MM:SS" lines
+    const groupAttendanceRegex = /Group attendance\s*\(\d+\)/i;
+    const matchGroup = groupAttendanceRegex.exec(text);
+    if (matchGroup) {
+      const rest = text.slice(matchGroup.index + matchGroup[0].length);
+      const lines = rest.split('\n');
+      for (const line of lines) {
+        // Match lines like "AngmarRK - 00:10" or "Crisp Tofu - 00:10"
+        const nameMatch = line.match(/^(.+?)\s*-\s*\d{1,2}:\d{2}\s*$/);
+        if (nameMatch) {
+          const candidate = (nameMatch[1] || '').trim();
+          if (candidate) names.push(candidate);
+        }
+      }
+      return names;
+    }
+
     return names;
   }
 
