@@ -233,6 +233,89 @@
       font-size: 14px;
       margin: 0 10px;
     }
+
+    /* Event Groups */
+    #history-interface .hi-event-group {
+      background: #2a2a4a;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    #history-interface .hi-event-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #3a3a5a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #history-interface .hi-event-header:hover {
+      background: #4a4a6a;
+    }
+    #history-interface .hi-event-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #80b5eb;
+    }
+    #history-interface .hi-event-meta {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    #history-interface .hi-event-date {
+      font-size: 13px;
+      color: #aaa;
+    }
+    #history-interface .hi-event-count {
+      background: #80b5eb;
+      color: #1a1a2e;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #history-interface .hi-event-toggle {
+      color: #aaa;
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    #history-interface .hi-event-group.expanded .hi-event-toggle {
+      transform: rotate(180deg);
+    }
+    #history-interface .hi-event-body {
+      display: none;
+      padding: 15px;
+      border-top: 1px solid #444;
+    }
+    #history-interface .hi-event-group.expanded .hi-event-body {
+      display: block;
+    }
+    #history-interface .hi-attendee-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    #history-interface .hi-attendee {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a2e;
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+    #history-interface .hi-attendee-name {
+      color: #eee;
+    }
+    #history-interface .hi-attendee-actions {
+      display: flex;
+      gap: 4px;
+    }
+    #history-interface .hi-attendee-actions button {
+      padding: 2px 6px;
+      font-size: 10px;
+    }
   `;
 
   const HTML = `
@@ -241,6 +324,7 @@
       
       <div class="hi-tabs">
         <button class="hi-tab active" data-tab="view">View Records</button>
+        <button class="hi-tab" data-tab="events">View by Event</button>
         <button class="hi-tab" data-tab="add">Add Record</button>
       </div>
 
@@ -275,6 +359,20 @@
         <div class="hi-pagination" id="hi-pagination"></div>
       </div>
 
+      <!-- View by Event Panel -->
+      <div class="hi-panel" data-panel="events">
+        <div class="hi-filters">
+          <input type="text" id="hi-event-filter-event" placeholder="Filter by event name...">
+          <input type="date" id="hi-event-filter-start" title="Start date">
+          <input type="date" id="hi-event-filter-end" title="End date">
+          <button class="hi-btn hi-btn-primary" id="hi-event-search-btn">Search</button>
+          <button class="hi-btn hi-btn-secondary" id="hi-event-clear-btn">Clear</button>
+        </div>
+        <div id="hi-event-groups">
+          <div class="hi-loading">Loading events...</div>
+        </div>
+      </div>
+
       <!-- Add Record Panel -->
       <div class="hi-panel" data-panel="add">
         <div class="hi-form">
@@ -307,6 +405,7 @@
   // State
   let apiBase = '';
   let records = [];
+  let eventGroups = [];
   let currentPage = 1;
   const pageSize = 20;
 
@@ -352,6 +451,93 @@
     });
     if (!resp.ok) throw new Error('Failed to delete record');
     return resp.json();
+  }
+
+  async function fetchAllRecords(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.event) params.append('event', filters.event);
+    if (filters.start) params.append('start', filters.start);
+    if (filters.end) params.append('end', filters.end);
+    params.append('limit', 1000); // Fetch more for grouping
+
+    const url = `${apiBase}/attendance/records?${params.toString()}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Failed to fetch records');
+    return resp.json();
+  }
+
+  function groupRecordsByEvent(records) {
+    const groups = {};
+    for (const record of records) {
+      const key = `${record.event}|||${record.date}`;
+      if (!groups[key]) {
+        groups[key] = {
+          event: record.event,
+          date: record.date,
+          attendees: []
+        };
+      }
+      groups[key].attendees.push({ id: record.id, name: record.name });
+    }
+    // Sort by date descending
+    return Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
+  }
+
+  function renderEventGroups(rootEl, groups) {
+    const container = rootEl.querySelector('#hi-event-groups');
+    eventGroups = groups;
+
+    if (groups.length === 0) {
+      container.innerHTML = '<div class="hi-empty">No events found</div>';
+      return;
+    }
+
+    container.innerHTML = groups.map((group, idx) => `
+      <div class="hi-event-group" data-idx="${idx}">
+        <div class="hi-event-header">
+          <div>
+            <div class="hi-event-title">${escapeHtml(group.event)}</div>
+          </div>
+          <div class="hi-event-meta">
+            <span class="hi-event-date">${group.date}</span>
+            <span class="hi-event-count">${group.attendees.length} attendee${group.attendees.length !== 1 ? 's' : ''}</span>
+            <span class="hi-event-toggle">▼</span>
+          </div>
+        </div>
+        <div class="hi-event-body">
+          <div class="hi-attendee-list">
+            ${group.attendees.map(a => `
+              <div class="hi-attendee" data-id="${a.id}">
+                <span class="hi-attendee-name">${escapeHtml(a.name)}</span>
+                <div class="hi-attendee-actions">
+                  <button class="hi-btn hi-btn-secondary hi-btn-sm hi-attendee-edit">✎</button>
+                  <button class="hi-btn hi-btn-danger hi-btn-sm hi-attendee-delete">✕</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadEventGroups(rootEl) {
+    const container = rootEl.querySelector('#hi-event-groups');
+    container.innerHTML = '<div class="hi-loading">Loading events...</div>';
+
+    const filters = {
+      event: rootEl.querySelector('#hi-event-filter-event').value.trim(),
+      start: rootEl.querySelector('#hi-event-filter-start').value,
+      end: rootEl.querySelector('#hi-event-filter-end').value
+    };
+
+    try {
+      const data = await fetchAllRecords(filters);
+      const groups = groupRecordsByEvent(data.results || []);
+      renderEventGroups(rootEl, groups);
+    } catch (err) {
+      container.innerHTML = `<div class="hi-empty">Error loading events: ${err.message}</div>`;
+    }
   }
 
   // UI helpers
@@ -406,7 +592,7 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  function showEditModal(rootEl, record) {
+  function showEditModal(rootEl, record, onSuccess = null) {
     const overlay = document.createElement('div');
     overlay.className = 'hi-modal-overlay';
     overlay.innerHTML = `
@@ -450,7 +636,11 @@
         await updateRecord(record.id, name, event, date);
         overlay.remove();
         showStatus(rootEl, 'Record updated successfully!', 'success');
-        loadRecords(rootEl);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          loadRecords(rootEl);
+        }
       } catch (err) {
         showStatus(rootEl, 'Failed to update record: ' + err.message, 'error');
       }
@@ -488,6 +678,10 @@
         panels.forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         rootEl.querySelector(`[data-panel="${tab.dataset.tab}"]`).classList.add('active');
+        // Load event groups when switching to that tab
+        if (tab.dataset.tab === 'events') {
+          loadEventGroups(rootEl);
+        }
       };
     });
 
@@ -561,6 +755,54 @@
       } else if (e.target.id === 'hi-next') {
         currentPage++;
         loadRecords(rootEl);
+      }
+    };
+
+    // Event groups - search/filter
+    rootEl.querySelector('#hi-event-search-btn').onclick = () => {
+      loadEventGroups(rootEl);
+    };
+    rootEl.querySelector('#hi-event-clear-btn').onclick = () => {
+      rootEl.querySelector('#hi-event-filter-event').value = '';
+      rootEl.querySelector('#hi-event-filter-start').value = '';
+      rootEl.querySelector('#hi-event-filter-end').value = '';
+      loadEventGroups(rootEl);
+    };
+
+    // Event groups - expand/collapse and actions
+    rootEl.querySelector('#hi-event-groups').onclick = async (e) => {
+      // Toggle expand/collapse
+      const header = e.target.closest('.hi-event-header');
+      if (header && !e.target.closest('button')) {
+        header.closest('.hi-event-group').classList.toggle('expanded');
+        return;
+      }
+
+      // Attendee actions
+      const attendeeEl = e.target.closest('.hi-attendee');
+      if (!attendeeEl) return;
+
+      const id = parseInt(attendeeEl.dataset.id);
+      const groupEl = e.target.closest('.hi-event-group');
+      const groupIdx = parseInt(groupEl.dataset.idx);
+      const group = eventGroups[groupIdx];
+      const attendee = group.attendees.find(a => a.id === id);
+      if (!attendee) return;
+
+      if (e.target.classList.contains('hi-attendee-edit')) {
+        // Edit - show modal with pre-filled event/date from group
+        const record = { id, name: attendee.name, event: group.event, date: group.date };
+        showEditModal(rootEl, record, () => loadEventGroups(rootEl));
+      } else if (e.target.classList.contains('hi-attendee-delete')) {
+        if (confirm(`Remove "${attendee.name}" from "${group.event}" on ${group.date}?`)) {
+          try {
+            await deleteRecord(id);
+            showStatus(rootEl, 'Record deleted successfully!', 'success');
+            loadEventGroups(rootEl);
+          } catch (err) {
+            showStatus(rootEl, 'Failed to delete record: ' + err.message, 'error');
+          }
+        }
       }
     };
 
