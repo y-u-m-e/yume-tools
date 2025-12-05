@@ -490,6 +490,66 @@
       color: #888;
       text-transform: uppercase;
     }
+
+    /* Duplicates */
+    #cruddy-panel .cp-dupe-group {
+      background: #2a2a4a;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      padding: 12px;
+    }
+    #cruddy-panel .cp-dupe-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #444;
+    }
+    #cruddy-panel .cp-dupe-info {
+      font-size: 14px;
+    }
+    #cruddy-panel .cp-dupe-info strong {
+      color: #80b5eb;
+    }
+    #cruddy-panel .cp-dupe-items {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    #cruddy-panel .cp-dupe-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #1a1a2e;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+    #cruddy-panel .cp-dupe-item.keep {
+      border: 2px solid #27ae60;
+      background: rgba(39, 174, 96, 0.1);
+    }
+    #cruddy-panel .cp-dupe-item .cp-dupe-id {
+      color: #666;
+      font-size: 12px;
+      width: 60px;
+    }
+    #cruddy-panel .cp-dupe-summary {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #3a3a5a;
+      border-radius: 8px;
+      text-align: center;
+    }
+    #cruddy-panel .cp-dupe-summary strong {
+      color: #e74c3c;
+    }
+    #cruddy-panel .cp-modal-scrollable {
+      max-height: 60vh;
+      overflow-y: auto;
+      margin: 15px 0;
+    }
   `;
 
   const HTML = `
@@ -514,6 +574,7 @@
           <input type="date" id="cp-filter-end" title="End date">
           <button class="cp-btn cp-btn-primary" id="cp-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-clear-btn">Clear</button>
+          <button class="cp-btn cp-btn-danger" id="cp-find-dupes-btn" title="Find duplicate records">🔍 Find Duplicates</button>
         </div>
         <div class="cp-table-wrap">
           <table>
@@ -896,6 +957,114 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
+  async function findDuplicates(rootEl) {
+    // Fetch all records to find duplicates
+    const data = await fetchAllRecords({});
+    const allRecords = data.results || [];
+    
+    // Group by name+event+date
+    const groups = {};
+    for (const record of allRecords) {
+      const key = `${record.name.toLowerCase()}|||${record.event.toLowerCase()}|||${record.date}`;
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(record);
+    }
+    
+    // Filter to only groups with duplicates (more than 1 record)
+    const duplicates = Object.values(groups).filter(g => g.length > 1);
+    return duplicates;
+  }
+
+  function showDuplicatesModal(rootEl, duplicates) {
+    const totalDupes = duplicates.reduce((sum, g) => sum + g.length - 1, 0); // -1 because we keep one
+    
+    const overlay = document.createElement('div');
+    overlay.className = 'cp-modal-overlay';
+    overlay.innerHTML = `
+      <div class="cp-modal" style="min-width: 600px; max-width: 800px;">
+        <h3>🔍 Duplicate Records Found</h3>
+        ${duplicates.length === 0 ? `
+          <div class="cp-empty">✅ No duplicate records found!</div>
+          <div class="cp-modal-actions">
+            <button class="cp-btn cp-btn-secondary" id="cp-dupe-close">Close</button>
+          </div>
+        ` : `
+          <div class="cp-dupe-summary">
+            Found <strong>${duplicates.length}</strong> groups with duplicates 
+            (<strong>${totalDupes}</strong> extra records to remove)
+          </div>
+          <div class="cp-modal-scrollable">
+            ${duplicates.map((group, gIdx) => `
+              <div class="cp-dupe-group" data-group="${gIdx}">
+                <div class="cp-dupe-header">
+                  <div class="cp-dupe-info">
+                    <strong>${escapeHtml(group[0].name)}</strong> at 
+                    <strong>${escapeHtml(group[0].event)}</strong> on 
+                    <strong>${group[0].date}</strong>
+                  </div>
+                  <span>${group.length} records</span>
+                </div>
+                <div class="cp-dupe-items">
+                  ${group.map((r, idx) => `
+                    <div class="cp-dupe-item ${idx === 0 ? 'keep' : ''}" data-id="${r.id}">
+                      <span class="cp-dupe-id">#${r.id}</span>
+                      <span>${idx === 0 ? '✓ Keep (lowest ID)' : '🗑 Will be deleted'}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="cp-modal-actions">
+            <button class="cp-btn cp-btn-secondary" id="cp-dupe-close">Cancel</button>
+            <button class="cp-btn cp-btn-danger" id="cp-dupe-delete">🗑 Delete ${totalDupes} Duplicate${totalDupes !== 1 ? 's' : ''}</button>
+          </div>
+        `}
+      </div>
+    `;
+
+    rootEl.appendChild(overlay);
+
+    overlay.querySelector('#cp-dupe-close').onclick = () => overlay.remove();
+    
+    const deleteBtn = overlay.querySelector('#cp-dupe-delete');
+    if (deleteBtn) {
+      deleteBtn.onclick = async () => {
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Deleting...';
+        
+        let deleted = 0;
+        let errors = 0;
+        
+        for (const group of duplicates) {
+          // Keep the first (lowest ID), delete the rest
+          for (let i = 1; i < group.length; i++) {
+            try {
+              await deleteRecord(group[i].id);
+              deleted++;
+            } catch (err) {
+              errors++;
+              console.error(`Failed to delete record ${group[i].id}:`, err);
+            }
+          }
+        }
+        
+        overlay.remove();
+        
+        if (errors > 0) {
+          showStatus(rootEl, `Deleted ${deleted} duplicates, ${errors} failed`, 'error');
+        } else {
+          showStatus(rootEl, `Successfully deleted ${deleted} duplicate records!`, 'success');
+        }
+        
+        // Refresh the records view
+        loadRecords(rootEl);
+      };
+    }
+  }
+
   function showEditModal(rootEl, record, onSuccess = null) {
     const overlay = document.createElement('div');
     overlay.className = 'cp-modal-overlay';
@@ -1003,6 +1172,24 @@
       rootEl.querySelector('#cp-filter-end').value = '';
       currentPage = 1;
       loadRecords(rootEl);
+    };
+
+    // Find duplicates
+    rootEl.querySelector('#cp-find-dupes-btn').onclick = async () => {
+      const btn = rootEl.querySelector('#cp-find-dupes-btn');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = '🔍 Scanning...';
+      
+      try {
+        const duplicates = await findDuplicates(rootEl);
+        showDuplicatesModal(rootEl, duplicates);
+      } catch (err) {
+        showStatus(rootEl, 'Error finding duplicates: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
     };
 
     // Add record
