@@ -102,7 +102,7 @@
   `;
 
   const NAV_ITEMS = [
-    { id: 'home', hash: '#', icon: '🏠', label: 'Home' },
+    { id: 'home', hash: '#home', icon: '🏠', label: 'Home' },
     { id: 'msg-maker', hash: '#msg-maker', icon: '💬', label: 'Mentions' },
     { id: 'log-maker', hash: '#log-maker', icon: '📋', label: 'Event Logs' },
     { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '🗃️', label: 'Cruddy Panel' }
