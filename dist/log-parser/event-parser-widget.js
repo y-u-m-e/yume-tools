@@ -392,20 +392,39 @@
      * copyToClipboard()
      * -----------------
      * Handler for "Copy to Clipboard" button:
-     * - Copies the formatted output to the user’s clipboard.
+     * - Copies the formatted output to the user's clipboard.
      * - Uses the modern Clipboard API if available, else falls back to execCommand.
      */
     function copyToClipboard() {
       const textToCopy = outputNamesEl.value || '';
+      if (!textToCopy || textToCopy === 'Your message will appear here.') {
+        showModal({
+          icon: '📝',
+          title: 'Nothing to Copy',
+          message: 'Extract names from an event log first before copying.',
+          buttons: [{ text: 'OK', class: 'ep-modal-btn-primary', action: null }]
+        });
+        return;
+      }
+      
+      const showSuccess = () => {
+        showModal({
+          icon: '✅',
+          title: 'Copied!',
+          message: 'The formatted output has been copied to your clipboard.',
+          buttons: [{ text: 'OK', class: 'ep-modal-btn-primary', action: null }]
+        });
+      };
+      
       if (!navigator.clipboard) {
         const ta = document.createElement('textarea');
         ta.value = textToCopy; document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); alert('Copied to clipboard!'); }
+        try { document.execCommand('copy'); showSuccess(); }
         finally { document.body.removeChild(ta); }
         return;
       }
       navigator.clipboard.writeText(textToCopy)
-        .then(() => alert('Copied to clipboard!'))
+        .then(showSuccess)
         .catch(err => console.error('Failed to copy: ', err));
     }
 
