@@ -183,11 +183,30 @@
   }
 
   function mount(selectorOrEl, config = {}) {
-    const host = (typeof selectorOrEl === 'string') ? document.querySelector(selectorOrEl) : selectorOrEl;
-    if (!host) return;
+    const tryMount = () => {
+      const host = (typeof selectorOrEl === 'string') ? document.querySelector(selectorOrEl) : selectorOrEl;
+      if (!host) {
+        console.warn('[NavBar] Mount point not found:', selectorOrEl);
+        return false;
+      }
+      console.log('[NavBar] Mounting to:', selectorOrEl);
+      injectStyles(document);
+      render(host, config);
+      return true;
+    };
 
-    injectStyles(document);
-    render(host, config);
+    // Try immediately
+    if (tryMount()) return;
+
+    // If DOM not ready, wait for it
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', tryMount);
+    } else {
+      // DOM is ready but element not found - try again after a short delay (Carrd timing issue)
+      setTimeout(tryMount, 100);
+      setTimeout(tryMount, 500);
+      setTimeout(tryMount, 1000);
+    }
   }
 
   return { mount };
