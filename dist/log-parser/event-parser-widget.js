@@ -158,7 +158,31 @@
       return names;
     }
 
-    // Format 2: "Group attendance (N)" followed by "Name - MM:SS" lines
+    // Format 2: Plain table with "Name | Time | Late" header (no code fence)
+    const plainTableRegex = /Name\s*\|\s*Time\s*\|\s*Late/i;
+    const matchPlain = plainTableRegex.exec(text);
+    if (matchPlain) {
+      const rest = text.slice(matchPlain.index + matchPlain[0].length);
+      const lines = rest.split('\n');
+      for (const line of lines) {
+        // Stop at empty line or "Thanks" message
+        if (line.trim() === '' || /thanks/i.test(line)) continue;
+        if (/^-+$/.test(line.trim())) continue; // skip separator lines like "-----"
+        
+        // Match lines with pipe separator: "Name | Time | Late"
+        const nameMatch = line.match(/^(.+?)\s*\|/);
+        if (nameMatch) {
+          const candidate = (nameMatch[1] || '').trim();
+          // Skip header row and separator
+          if (candidate && candidate !== 'Name' && !candidate.match(/^-+$/)) {
+            names.push(candidate);
+          }
+        }
+      }
+      if (names.length > 0) return names;
+    }
+
+    // Format 3: "Group attendance (N)" followed by "Name - MM:SS" lines
     const groupAttendanceRegex = /Group attendance\s*\(\d+\)/i;
     const matchGroup = groupAttendanceRegex.exec(text);
     if (matchGroup) {
