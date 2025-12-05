@@ -512,6 +512,7 @@
           <div class="hi-event-meta">
             <span class="hi-event-date">${group.date}</span>
             <span class="hi-event-count">${group.attendees.length} attendee${group.attendees.length !== 1 ? 's' : ''}</span>
+            <button class="hi-btn hi-btn-danger hi-btn-sm hi-event-delete" title="Delete entire event">🗑</button>
             <span class="hi-event-toggle">▼</span>
           </div>
         </div>
@@ -807,6 +808,31 @@
 
     // Event groups - expand/collapse and actions
     rootEl.querySelector('#hi-event-groups').onclick = async (e) => {
+      const groupEl = e.target.closest('.hi-event-group');
+      if (!groupEl) return;
+      
+      const groupIdx = parseInt(groupEl.dataset.idx);
+      const group = allEventGroups[groupIdx];
+      if (!group) return;
+
+      // Delete entire event
+      if (e.target.classList.contains('hi-event-delete')) {
+        const count = group.attendees.length;
+        if (confirm(`Delete entire event "${group.event}" on ${group.date}?\n\nThis will remove all ${count} attendance record${count !== 1 ? 's' : ''}.`)) {
+          try {
+            // Delete all records for this event
+            for (const attendee of group.attendees) {
+              await deleteRecord(attendee.id);
+            }
+            showStatus(rootEl, `Deleted ${count} record${count !== 1 ? 's' : ''} for "${group.event}"`, 'success');
+            loadEventGroups(rootEl);
+          } catch (err) {
+            showStatus(rootEl, 'Failed to delete event: ' + err.message, 'error');
+          }
+        }
+        return;
+      }
+
       // Toggle expand/collapse
       const header = e.target.closest('.hi-event-header');
       if (header && !e.target.closest('button')) {
@@ -819,10 +845,6 @@
       if (!attendeeEl) return;
 
       const id = parseInt(attendeeEl.dataset.id);
-      const groupEl = e.target.closest('.hi-event-group');
-      const groupIdx = parseInt(groupEl.dataset.idx);
-      const group = allEventGroups[groupIdx];
-      if (!group) return;
       const attendee = group.attendees.find(a => a.id === id);
       if (!attendee) return;
 
