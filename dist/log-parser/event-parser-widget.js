@@ -152,6 +152,25 @@
 
 
     /**
+     * looksLikeEventLog(text)
+     * -----------------------
+     * Checks if text looks like it contains event log data that
+     * should be in the log input field instead of notes.
+     */
+    function looksLikeEventLog(text) {
+      if (!text) return false;
+      // Check for patterns that indicate event log data
+      const patterns = [
+        /Name\s*\|\s*Time\s*\|\s*Late/i,           // Table header
+        /Present Members/i,                         // Common log header
+        /Group attendance\s*\(\d+\)/i,              // Group attendance format
+        /^\s*\w+\s*\|\s*\d{1,2}:\d{2}\s*\|/m,      // Name | Time | Late row
+        /^\s*.+\s*-\s*\d{1,2}:\d{2}\s*$/m          // Name - MM:SS format
+      ];
+      return patterns.some(p => p.test(text));
+    }
+
+    /**
      * buildEmbed(names, eventName, eventTime, eventNotes)
      * ---------------------------------------------------
      * Creates a Discord-compatible embed payload object,
@@ -187,10 +206,27 @@
      * - Sends the same info to the webhook in the background.
      */
     function extractNames() {
-      const names = parseNamesFromLog(inputTextEl.value || '');
       const eventName = (eventNameEl.value || '').trim();
       const eventTime = (eventTimeEl.value || '').trim();
       const eventNotes = (eventNotesEl.value || '').trim();
+      const logText = inputTextEl.value || '';
+
+      // Check if Event Notes contains log data (wrong field)
+      if (looksLikeEventLog(eventNotes)) {
+        const proceed = confirm(
+          '⚠️ It looks like you may have pasted the event log into the "Event Notes" field.\n\n' +
+          'The event log should be pasted into the "Paste your event log here" field below.\n\n' +
+          'Click OK to continue anyway, or Cancel to go back and fix it.'
+        );
+        if (!proceed) return;
+      }
+
+      const names = parseNamesFromLog(logText);
+
+      // Warn if no names were extracted
+      if (names.length === 0) {
+        alert('⚠️ No names were extracted from the event log.\n\nMake sure you pasted the full event log into the correct field.');
+      }
 
       const result = `Event Name:\n${eventName}\n\nEvent Time:\n${eventTime}\n\nEvent Notes:\n${eventNotes}\n\nAttendance:\n${names.join(', ')}`;
       outputNamesEl.value = result;
