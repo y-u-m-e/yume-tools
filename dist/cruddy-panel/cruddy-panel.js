@@ -698,10 +698,10 @@
 
   // State
   let apiBase = '';
-  const records = [];
-  const eventGroups = [];
-  const allEventGroups = [];
-  const leaderboardData = [];
+  let records = [];
+  let eventGroups = [];
+  let allEventGroups = [];
+  let leaderboardData = [];
   let currentPage = 1;
   let eventCurrentPage = 1;
   const pageSize = 20;
