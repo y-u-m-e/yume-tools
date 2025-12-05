@@ -371,6 +371,7 @@
         <div id="hi-event-groups">
           <div class="hi-loading">Loading events...</div>
         </div>
+        <div class="hi-pagination" id="hi-event-pagination"></div>
       </div>
 
       <!-- Add Record Panel -->
@@ -406,8 +407,11 @@
   let apiBase = '';
   let records = [];
   let eventGroups = [];
+  let allEventGroups = [];
   let currentPage = 1;
+  let eventCurrentPage = 1;
   const pageSize = 20;
+  const eventPageSize = 10;
 
   // API calls
   async function fetchRecords(filters = {}) {
@@ -483,17 +487,24 @@
     return Object.values(groups).sort((a, b) => b.date.localeCompare(a.date));
   }
 
-  function renderEventGroups(rootEl, groups) {
+  function renderEventGroups(rootEl) {
     const container = rootEl.querySelector('#hi-event-groups');
-    eventGroups = groups;
+    const paginationEl = rootEl.querySelector('#hi-event-pagination');
 
-    if (groups.length === 0) {
+    if (allEventGroups.length === 0) {
       container.innerHTML = '<div class="hi-empty">No events found</div>';
+      paginationEl.innerHTML = '';
       return;
     }
 
-    container.innerHTML = groups.map((group, idx) => `
-      <div class="hi-event-group" data-idx="${idx}">
+    // Paginate the groups
+    const totalPages = Math.ceil(allEventGroups.length / eventPageSize);
+    const startIdx = (eventCurrentPage - 1) * eventPageSize;
+    const endIdx = startIdx + eventPageSize;
+    eventGroups = allEventGroups.slice(startIdx, endIdx);
+
+    container.innerHTML = eventGroups.map((group, idx) => `
+      <div class="hi-event-group" data-idx="${startIdx + idx}">
         <div class="hi-event-header">
           <div>
             <div class="hi-event-title">${escapeHtml(group.event)}</div>
@@ -519,6 +530,17 @@
         </div>
       </div>
     `).join('');
+
+    // Render pagination
+    if (totalPages > 1) {
+      paginationEl.innerHTML = `
+        <button class="hi-btn hi-btn-secondary hi-btn-sm" id="hi-event-prev" ${eventCurrentPage === 1 ? 'disabled' : ''}>← Prev</button>
+        <span>Page ${eventCurrentPage} of ${totalPages} (${allEventGroups.length} events)</span>
+        <button class="hi-btn hi-btn-secondary hi-btn-sm" id="hi-event-next" ${eventCurrentPage === totalPages ? 'disabled' : ''}>Next →</button>
+      `;
+    } else {
+      paginationEl.innerHTML = allEventGroups.length > 0 ? `<span>${allEventGroups.length} event${allEventGroups.length !== 1 ? 's' : ''}</span>` : '';
+    }
   }
 
   async function loadEventGroups(rootEl) {
@@ -533,8 +555,8 @@
 
     try {
       const data = await fetchAllRecords(filters);
-      const groups = groupRecordsByEvent(data.results || []);
-      renderEventGroups(rootEl, groups);
+      allEventGroups = groupRecordsByEvent(data.results || []);
+      renderEventGroups(rootEl);
     } catch (err) {
       container.innerHTML = `<div class="hi-empty">Error loading events: ${err.message}</div>`;
     }
@@ -760,13 +782,27 @@
 
     // Event groups - search/filter
     rootEl.querySelector('#hi-event-search-btn').onclick = () => {
+      eventCurrentPage = 1;
       loadEventGroups(rootEl);
     };
     rootEl.querySelector('#hi-event-clear-btn').onclick = () => {
       rootEl.querySelector('#hi-event-filter-event').value = '';
       rootEl.querySelector('#hi-event-filter-start').value = '';
       rootEl.querySelector('#hi-event-filter-end').value = '';
+      eventCurrentPage = 1;
       loadEventGroups(rootEl);
+    };
+
+    // Event groups - pagination
+    rootEl.querySelector('#hi-event-pagination').onclick = (e) => {
+      const totalPages = Math.ceil(allEventGroups.length / eventPageSize);
+      if (e.target.id === 'hi-event-prev' && eventCurrentPage > 1) {
+        eventCurrentPage--;
+        renderEventGroups(rootEl);
+      } else if (e.target.id === 'hi-event-next' && eventCurrentPage < totalPages) {
+        eventCurrentPage++;
+        renderEventGroups(rootEl);
+      }
     };
 
     // Event groups - expand/collapse and actions
@@ -785,7 +821,8 @@
       const id = parseInt(attendeeEl.dataset.id);
       const groupEl = e.target.closest('.hi-event-group');
       const groupIdx = parseInt(groupEl.dataset.idx);
-      const group = eventGroups[groupIdx];
+      const group = allEventGroups[groupIdx];
+      if (!group) return;
       const attendee = group.attendees.find(a => a.id === id);
       if (!attendee) return;
 
