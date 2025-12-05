@@ -43,6 +43,80 @@
       color: #80b5eb;
       text-align: center;
     }
+    
+    /* Auth screens */
+    #history-interface .hi-auth-screen {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    #history-interface .hi-auth-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    #history-interface .hi-auth-title {
+      font-size: 24px;
+      color: #80b5eb;
+      margin-bottom: 10px;
+    }
+    #history-interface .hi-auth-message {
+      color: #888;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    #history-interface .hi-discord-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: #5865F2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    #history-interface .hi-discord-btn:hover {
+      background: #4752C4;
+    }
+    #history-interface .hi-unauthorized {
+      background: linear-gradient(135deg, #2d1f1f 0%, #1a1a2e 100%);
+    }
+    #history-interface .hi-unauthorized .hi-auth-icon {
+      color: #e74c3c;
+    }
+    #history-interface .hi-user-info {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #2a2a4a;
+      border-radius: 8px;
+    }
+    #history-interface .hi-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+    #history-interface .hi-user-name {
+      color: #eee;
+      font-size: 14px;
+    }
+    #history-interface .hi-logout-btn {
+      padding: 6px 12px;
+      background: #555;
+      color: #eee;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    #history-interface .hi-logout-btn:hover {
+      background: #666;
+    }
     #history-interface .hi-tabs {
       display: flex;
       gap: 10px;
@@ -869,12 +943,107 @@
     loadRecords(rootEl);
   }
 
-  function mount(selectorOrEl, config = {}) {
+  // Auth screen HTML templates
+  const LOGIN_HTML = `
+    <div id="history-interface">
+      <div class="hi-auth-screen">
+        <div class="hi-auth-icon">🔐</div>
+        <div class="hi-auth-title">Authentication Required</div>
+        <p class="hi-auth-message">Sign in with Discord to access the Attendance Manager.</p>
+        <a class="hi-discord-btn" id="hi-login-btn">
+          <svg width="24" height="24" viewBox="0 0 71 55" fill="currentColor">
+            <path d="M60.1 4.9A58.5 58.5 0 0045.4.4a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.4.5a.2.2 0 00-.2-.1 58.4 58.4 0 00-14.7 4.5.2.2 0 00-.1.1A60 60 0 00.4 44.4a.2.2 0 000 .2 58.7 58.7 0 0017.7 9 .2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 41.9 41.9 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.3 36.3 0 01-5.5 2.6.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.2.1 58.5 58.5 0 0017.8-9 .2.2 0 000-.2c1.5-15.3-2.4-28.6-10.3-40.4a.2.2 0 00-.1-.1zM23.7 36.4c-3.5 0-6.4-3.2-6.4-7.1s2.8-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 3.9-2.8 7.1-6.4 7.1zm23.6 0c-3.5 0-6.4-3.2-6.4-7.1s2.9-7.2 6.4-7.2c3.6 0 6.5 3.3 6.4 7.2 0 3.9-2.8 7.1-6.4 7.1z"/>
+          </svg>
+          Sign in with Discord
+        </a>
+      </div>
+    </div>
+  `;
+
+  const UNAUTHORIZED_HTML = (username, avatar) => `
+    <div id="history-interface" class="hi-unauthorized">
+      <div class="hi-auth-screen">
+        <div class="hi-auth-icon">🚫</div>
+        <div class="hi-auth-title">Access Denied</div>
+        <p class="hi-auth-message">
+          Sorry <strong>${username}</strong>, you are not authorized to access this page.<br>
+          Contact an administrator if you believe this is a mistake.
+        </p>
+        <a class="hi-discord-btn" id="hi-logout-btn" style="background: #555;">
+          Sign Out
+        </a>
+      </div>
+    </div>
+  `;
+
+  async function checkAuth(apiBase) {
+    try {
+      const resp = await fetch(`${apiBase}/auth/me`, { credentials: 'include' });
+      if (!resp.ok) return { authenticated: false };
+      return await resp.json();
+    } catch {
+      return { authenticated: false };
+    }
+  }
+
+  async function mount(selectorOrEl, config = {}) {
     const host = (typeof selectorOrEl === 'string') ? document.querySelector(selectorOrEl) : selectorOrEl;
     if (!host) return;
+    
+    const apiBase = config.apiBase || '';
     injectStyles(document);
+
+    // Show loading state
+    host.innerHTML = `
+      <div id="history-interface">
+        <div class="hi-auth-screen">
+          <div class="hi-auth-icon">⏳</div>
+          <div class="hi-auth-title">Loading...</div>
+        </div>
+      </div>
+    `;
+
+    // Check authentication
+    const auth = await checkAuth(apiBase);
+
+    if (!auth.authenticated) {
+      // Show login screen
+      host.innerHTML = LOGIN_HTML;
+      host.querySelector('#hi-login-btn').onclick = () => {
+        window.location.href = `${apiBase}/auth/login`;
+      };
+      return;
+    }
+
+    if (!auth.authorized) {
+      // Show unauthorized screen
+      host.innerHTML = UNAUTHORIZED_HTML(auth.user.username, auth.user.avatar);
+      host.querySelector('#hi-logout-btn').onclick = () => {
+        window.location.href = `${apiBase}/auth/logout`;
+      };
+      return;
+    }
+
+    // User is authenticated and authorized - show the full interface
     host.innerHTML = HTML;
-    wire(host, config);
+    
+    // Add user info bar at the top
+    const container = host.querySelector('#history-interface');
+    const userInfoHtml = `
+      <div class="hi-user-info">
+        ${auth.user.avatar ? `<img class="hi-user-avatar" src="https://cdn.discordapp.com/avatars/${auth.user.id}/${auth.user.avatar}.png" alt="">` : ''}
+        <span class="hi-user-name">${auth.user.username}</span>
+        <button class="hi-logout-btn" id="hi-logout-btn">Logout</button>
+      </div>
+    `;
+    container.insertAdjacentHTML('afterbegin', userInfoHtml);
+
+    // Wire up logout
+    host.querySelector('#hi-logout-btn').onclick = () => {
+      window.location.href = `${apiBase}/auth/logout`;
+    };
+
+    wire(container, config);
   }
 
   return { mount };
