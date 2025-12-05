@@ -390,6 +390,106 @@
       padding: 2px 6px;
       font-size: 10px;
     }
+
+    /* Leaderboard */
+    #history-interface .hi-leaderboard-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    #history-interface .hi-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    #history-interface .hi-control-group label {
+      font-size: 12px;
+      color: #888;
+    }
+    #history-interface .hi-control-group select,
+    #history-interface .hi-control-group input {
+      padding: 8px 12px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background: #2a2a4a;
+      color: #eee;
+      font-size: 14px;
+    }
+    #history-interface .hi-leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    #history-interface .hi-leader-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 16px;
+      background: #2a2a4a;
+      border-radius: 8px;
+      transition: transform 0.2s, background 0.2s;
+    }
+    #history-interface .hi-leader-row:hover {
+      background: #3a3a5a;
+      transform: translateX(4px);
+    }
+    #history-interface .hi-leader-rank {
+      font-size: 20px;
+      font-weight: 700;
+      width: 40px;
+      text-align: center;
+    }
+    #history-interface .hi-leader-row:nth-child(1) .hi-leader-rank { color: #ffd700; }
+    #history-interface .hi-leader-row:nth-child(2) .hi-leader-rank { color: #c0c0c0; }
+    #history-interface .hi-leader-row:nth-child(3) .hi-leader-rank { color: #cd7f32; }
+    #history-interface .hi-leader-row:nth-child(n+4) .hi-leader-rank { color: #666; }
+    #history-interface .hi-leader-name {
+      flex: 1;
+      font-size: 16px;
+      color: #eee;
+    }
+    #history-interface .hi-leader-count {
+      font-size: 18px;
+      font-weight: 600;
+      color: #80b5eb;
+    }
+    #history-interface .hi-leader-bar {
+      flex: 0 0 200px;
+      height: 8px;
+      background: #1a1a2e;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    #history-interface .hi-leader-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #80b5eb, #5a9fd4);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    #history-interface .hi-leaderboard-summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #2a2a4a;
+      border-radius: 8px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    #history-interface .hi-stat {
+      text-align: center;
+    }
+    #history-interface .hi-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #80b5eb;
+    }
+    #history-interface .hi-stat-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+    }
   `;
 
   const HTML = `
@@ -399,6 +499,7 @@
       <div class="hi-tabs">
         <button class="hi-tab active" data-tab="view">View Records</button>
         <button class="hi-tab" data-tab="events">View by Event</button>
+        <button class="hi-tab" data-tab="leaderboard">🏆 Leaderboard</button>
         <button class="hi-tab" data-tab="add">Add Record</button>
       </div>
 
@@ -448,6 +549,49 @@
         <div class="hi-pagination" id="hi-event-pagination"></div>
       </div>
 
+      <!-- Leaderboard Panel -->
+      <div class="hi-panel" data-panel="leaderboard">
+        <div class="hi-leaderboard-controls">
+          <div class="hi-control-group">
+            <label>Show Top</label>
+            <select id="hi-leader-top">
+              <option value="5">Top 5</option>
+              <option value="10" selected>Top 10</option>
+              <option value="25">Top 25</option>
+              <option value="50">Top 50</option>
+              <option value="100">Top 100</option>
+            </select>
+          </div>
+          <div class="hi-control-group">
+            <label>From Date</label>
+            <input type="date" id="hi-leader-start">
+          </div>
+          <div class="hi-control-group">
+            <label>To Date</label>
+            <input type="date" id="hi-leader-end">
+          </div>
+          <button class="hi-btn hi-btn-primary" id="hi-leader-refresh">Refresh</button>
+          <button class="hi-btn hi-btn-secondary" id="hi-leader-clear">All Time</button>
+        </div>
+        <div id="hi-leaderboard">
+          <div class="hi-loading">Loading leaderboard...</div>
+        </div>
+        <div class="hi-leaderboard-summary" id="hi-leader-summary" style="display:none;">
+          <div class="hi-stat">
+            <div class="hi-stat-value" id="hi-stat-total">-</div>
+            <div class="hi-stat-label">Total Events</div>
+          </div>
+          <div class="hi-stat">
+            <div class="hi-stat-value" id="hi-stat-participants">-</div>
+            <div class="hi-stat-label">Unique Participants</div>
+          </div>
+          <div class="hi-stat">
+            <div class="hi-stat-value" id="hi-stat-avg">-</div>
+            <div class="hi-stat-label">Avg per Person</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Add Record Panel -->
       <div class="hi-panel" data-panel="add">
         <div class="hi-form">
@@ -482,6 +626,7 @@
   let records = [];
   let eventGroups = [];
   let allEventGroups = [];
+  let leaderboardData = [];
   let currentPage = 1;
   let eventCurrentPage = 1;
   const pageSize = 20;
@@ -541,6 +686,18 @@
     const url = `${apiBase}/attendance/records?${params.toString()}`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('Failed to fetch records');
+    return resp.json();
+  }
+
+  async function fetchLeaderboard(top = 10, start = '', end = '') {
+    const params = new URLSearchParams();
+    params.append('top', top);
+    if (start) params.append('start', start);
+    if (end) params.append('end', end);
+
+    const url = `${apiBase}/attendance?${params.toString()}`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Failed to fetch leaderboard');
     return resp.json();
   }
 
@@ -634,6 +791,56 @@
       renderEventGroups(rootEl);
     } catch (err) {
       container.innerHTML = `<div class="hi-empty">Error loading events: ${err.message}</div>`;
+    }
+  }
+
+  function renderLeaderboard(rootEl) {
+    const container = rootEl.querySelector('#hi-leaderboard');
+    const summaryEl = rootEl.querySelector('#hi-leader-summary');
+
+    if (leaderboardData.length === 0) {
+      container.innerHTML = '<div class="hi-empty">No attendance data found</div>';
+      summaryEl.style.display = 'none';
+      return;
+    }
+
+    const maxCount = leaderboardData[0]?.count || 1;
+    const totalEvents = leaderboardData.reduce((sum, p) => sum + p.count, 0);
+    const avgPerPerson = (totalEvents / leaderboardData.length).toFixed(1);
+
+    container.innerHTML = leaderboardData.map((p, idx) => `
+      <div class="hi-leader-row">
+        <div class="hi-leader-rank">#${idx + 1}</div>
+        <div class="hi-leader-name">${escapeHtml(p.name)}</div>
+        <div class="hi-leader-bar">
+          <div class="hi-leader-bar-fill" style="width: ${(p.count / maxCount) * 100}%"></div>
+        </div>
+        <div class="hi-leader-count">${p.count}</div>
+      </div>
+    `).join('');
+
+    // Update summary stats
+    rootEl.querySelector('#hi-stat-total').textContent = totalEvents;
+    rootEl.querySelector('#hi-stat-participants').textContent = leaderboardData.length;
+    rootEl.querySelector('#hi-stat-avg').textContent = avgPerPerson;
+    summaryEl.style.display = 'flex';
+  }
+
+  async function loadLeaderboard(rootEl) {
+    const container = rootEl.querySelector('#hi-leaderboard');
+    container.innerHTML = '<div class="hi-loading">Loading leaderboard...</div>';
+
+    const top = parseInt(rootEl.querySelector('#hi-leader-top').value) || 10;
+    const start = rootEl.querySelector('#hi-leader-start').value;
+    const end = rootEl.querySelector('#hi-leader-end').value;
+
+    try {
+      const data = await fetchLeaderboard(top, start, end);
+      leaderboardData = data.results || [];
+      renderLeaderboard(rootEl);
+    } catch (err) {
+      container.innerHTML = `<div class="hi-empty">Error loading leaderboard: ${err.message}</div>`;
+      rootEl.querySelector('#hi-leader-summary').style.display = 'none';
     }
   }
 
@@ -775,9 +982,11 @@
         panels.forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         rootEl.querySelector(`[data-panel="${tab.dataset.tab}"]`).classList.add('active');
-        // Load event groups when switching to that tab
+        // Load data when switching to tabs
         if (tab.dataset.tab === 'events') {
           loadEventGroups(rootEl);
+        } else if (tab.dataset.tab === 'leaderboard') {
+          loadLeaderboard(rootEl);
         }
       };
     });
@@ -879,6 +1088,15 @@
         renderEventGroups(rootEl);
       }
     };
+
+    // Leaderboard controls
+    rootEl.querySelector('#hi-leader-refresh').onclick = () => loadLeaderboard(rootEl);
+    rootEl.querySelector('#hi-leader-clear').onclick = () => {
+      rootEl.querySelector('#hi-leader-start').value = '';
+      rootEl.querySelector('#hi-leader-end').value = '';
+      loadLeaderboard(rootEl);
+    };
+    rootEl.querySelector('#hi-leader-top').onchange = () => loadLeaderboard(rootEl);
 
     // Event groups - expand/collapse and actions
     rootEl.querySelector('#hi-event-groups').onclick = async (e) => {
