@@ -231,7 +231,10 @@
         /Present Members/i,                         // Common log header
         /Group attendance\s*\(\d+\)/i,              // Group attendance format
         /^\s*\w+\s*\|\s*\d{1,2}:\d{2}\s*\|/m,      // Name | Time | Late row
-        /^\s*.+\s*-\s*\d{1,2}:\d{2}\s*$/m          // Name - MM:SS format
+        /^\s*.+\s*-\s*\d{1,2}:\d{2}\s*$/m,         // Name - MM:SS format
+        /Event\s*name\s*:/i,                        // "Event name:" header
+        /Hosted\s*by\s*:/i,                         // "Hosted by:" header
+        /Event\s*Duration\s*:/i                     // "Event Duration:" header
       ];
       return patterns.some(p => p.test(text));
     }
