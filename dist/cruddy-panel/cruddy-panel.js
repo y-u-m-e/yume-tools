@@ -973,7 +973,10 @@
     }
     
     // Filter to only groups with duplicates (more than 1 record)
-    const duplicates = Object.values(groups).filter(g => g.length > 1);
+    // Sort each group by ID ascending so lowest ID is first (the one we keep)
+    const duplicates = Object.values(groups)
+      .filter(g => g.length > 1)
+      .map(g => g.sort((a, b) => a.id - b.id));
     return duplicates;
   }
 
