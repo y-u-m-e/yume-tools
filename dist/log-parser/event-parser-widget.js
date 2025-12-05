@@ -35,6 +35,72 @@
     #event-parser #outputNames { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; white-space: pre-wrap; min-height: 150px; font-family: 'Segoe UI', sans-serif; resize: none; }
     #event-parser button { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; border: none; background: #8e9296; color: white; border-radius: 5px; cursor: pointer; font-family: 'Segoe UI', sans-serif; }
     #event-parser button:hover { background: #80b5eb; }
+    
+    /* Modal styles */
+    .ep-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .ep-modal {
+      background: #1a1a2e;
+      padding: 25px;
+      border-radius: 12px;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      color: #eee;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+    .ep-modal-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .ep-modal h4 {
+      margin: 0 0 15px 0;
+      color: #f5a623;
+      font-size: 20px;
+    }
+    .ep-modal p {
+      margin: 0 0 20px 0;
+      color: #bbb;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .ep-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ep-modal-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: 'Segoe UI', sans-serif;
+      transition: all 0.2s;
+    }
+    .ep-modal-btn-primary {
+      background: #80b5eb;
+      color: #1a1a2e;
+    }
+    .ep-modal-btn-primary:hover { background: #6aa5db; }
+    .ep-modal-btn-secondary {
+      background: #3a3a5a;
+      color: #eee;
+    }
+    .ep-modal-btn-secondary:hover { background: #4a4a6a; }
+    .ep-modal-btn-text {
+      background: transparent;
+      color: #777;
+      font-size: 12px;
+    }
+    .ep-modal-btn-text:hover { color: #aaa; }
   `;
 
   const HTML = `
@@ -197,6 +263,46 @@
     }
 
     /**
+     * showModal(options)
+     * ------------------
+     * Shows a custom modal dialog.
+     * options: { icon, title, message, buttons: [{ text, class, action }] }
+     */
+    function showModal(options) {
+      const overlay = document.createElement('div');
+      overlay.className = 'ep-modal-overlay';
+      overlay.innerHTML = `
+        <div class="ep-modal">
+          <div class="ep-modal-icon">${options.icon || '⚠️'}</div>
+          <h4>${options.title || 'Notice'}</h4>
+          <p>${options.message || ''}</p>
+          <div class="ep-modal-actions">
+            ${options.buttons.map((btn, i) => `
+              <button class="ep-modal-btn ${btn.class || ''}" data-idx="${i}">${btn.text}</button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      overlay.querySelector('.ep-modal-actions').onclick = (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const idx = parseInt(btn.dataset.idx);
+        overlay.remove();
+        if (options.buttons[idx].action) {
+          options.buttons[idx].action();
+        }
+      };
+      
+      // Close on overlay click
+      overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.remove();
+      };
+    }
+
+    /**
      * extractNames()
      * --------------
      * Handler for "Extract Names" button:
@@ -213,19 +319,62 @@
 
       // Check if Event Notes contains log data (wrong field)
       if (looksLikeEventLog(eventNotes)) {
-        const proceed = confirm(
-          '⚠️ It looks like you may have pasted the event log into the "Event Notes" field.\n\n' +
-          'The event log should be pasted into the "Paste your event log here" field below.\n\n' +
-          'Click OK to continue anyway, or Cancel to go back and fix it.'
-        );
-        if (!proceed) return;
+        showModal({
+          icon: '📋',
+          title: 'Event Log Detected in Notes',
+          message: 'It looks like you pasted the event log into the <strong>Event Notes</strong> field instead of the <strong>Paste your event log here</strong> field.',
+          buttons: [
+            {
+              text: '✨ Move to Correct Field',
+              class: 'ep-modal-btn-primary',
+              action: () => {
+                // Move content from notes to log field
+                inputTextEl.value = eventNotes;
+                eventNotesEl.value = '';
+                inputTextEl.focus();
+              }
+            },
+            {
+              text: 'Continue Anyway',
+              class: 'ep-modal-btn-secondary',
+              action: () => processExtraction(eventName, eventTime, eventNotes, logText)
+            },
+            {
+              text: 'Cancel',
+              class: 'ep-modal-btn-text',
+              action: null
+            }
+          ]
+        });
+        return;
       }
 
+      processExtraction(eventName, eventTime, eventNotes, logText);
+    }
+
+    /**
+     * processExtraction()
+     * -------------------
+     * Actually performs the name extraction and webhook send.
+     */
+    function processExtraction(eventName, eventTime, eventNotes, logText) {
       const names = parseNamesFromLog(logText);
 
       // Warn if no names were extracted
       if (names.length === 0) {
-        alert('⚠️ No names were extracted from the event log.\n\nMake sure you pasted the full event log into the correct field.');
+        showModal({
+          icon: '🔍',
+          title: 'No Names Found',
+          message: 'No attendance names were extracted from the event log.<br><br>Make sure you pasted the full event log into the correct field.',
+          buttons: [
+            {
+              text: 'OK',
+              class: 'ep-modal-btn-primary',
+              action: null
+            }
+          ]
+        });
+        return;
       }
 
       const result = `Event Name:\n${eventName}\n\nEvent Time:\n${eventTime}\n\nEvent Notes:\n${eventNotes}\n\nAttendance:\n${names.join(', ')}`;
