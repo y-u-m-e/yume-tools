@@ -20,16 +20,16 @@
 
     .yume-nav {
       font-family: 'Outfit', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, rgba(15, 15, 26, 0.95) 0%, rgba(26, 26, 46, 0.95) 100%);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 8px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.85) 0%, rgba(25, 50, 80, 0.85) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 8px 12px;
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
       justify-content: center;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(128, 181, 235, 0.15);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(94, 234, 212, 0.1);
+      border: 1px solid rgba(94, 234, 212, 0.2);
     }
 
     .yume-nav-item {
@@ -39,14 +39,14 @@
       padding: 12px 20px;
       background: transparent;
       border: none;
-      border-radius: 8px;
-      color: #888;
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.6);
       font-family: inherit;
       font-size: 14px;
       font-weight: 500;
       text-decoration: none;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
       overflow: hidden;
     }
@@ -55,14 +55,15 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, rgba(128, 181, 235, 0.15) 0%, rgba(128, 181, 235, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(45, 212, 191, 0.08) 100%);
       opacity: 0;
-      transition: opacity 0.25s ease;
-      border-radius: 8px;
+      transition: opacity 0.3s ease;
+      border-radius: 10px;
     }
 
     .yume-nav-item:hover {
-      color: #ccc;
+      color: rgba(255, 255, 255, 0.9);
+      transform: translateY(-1px);
     }
 
     .yume-nav-item:hover::before {
@@ -70,8 +71,9 @@
     }
 
     .yume-nav-item.active {
-      color: #80b5eb;
-      background: rgba(128, 181, 235, 0.2);
+      color: #5eead4;
+      background: linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(45, 212, 191, 0.15) 100%);
+      box-shadow: 0 0 20px rgba(94, 234, 212, 0.15);
     }
 
     .yume-nav-item.active::before {
@@ -100,7 +102,7 @@
     /* Compact variant for mobile */
     @media (max-width: 600px) {
       .yume-nav {
-        padding: 6px;
+        padding: 6px 8px;
         gap: 4px;
       }
       .yume-nav-item {
@@ -115,18 +117,18 @@
       }
     }
 
-    /* Dark glow effect on active */
+    /* Glow effect on active */
     .yume-nav-item.active::after {
       content: '';
       position: absolute;
-      bottom: -2px;
+      bottom: 2px;
       left: 50%;
       transform: translateX(-50%);
-      width: 40%;
+      width: 50%;
       height: 3px;
-      background: #80b5eb;
+      background: linear-gradient(90deg, transparent, #5eead4, transparent);
       border-radius: 3px;
-      box-shadow: 0 0 10px rgba(128, 181, 235, 0.5);
+      box-shadow: 0 0 12px rgba(94, 234, 212, 0.6);
     }
   `;
 
@@ -134,7 +136,7 @@
     { id: 'home', hash: '', icon: '🏠', label: 'Home' },
     { id: 'msg-maker', hash: '#msg-maker', icon: '💬', label: 'Mentions' },
     { id: 'log-maker', hash: '#log-maker', icon: '📋', label: 'Event Logs' },
-    { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '⚙️', label: 'Admin' }
+    { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '🗃️', label: 'Cruddy Panel' }
   ];
 
   function injectStyles(doc) {

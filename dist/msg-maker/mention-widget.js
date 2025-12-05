@@ -25,14 +25,79 @@
   const CSS_ID = 'mention-widget-styles';
 
   const STYLE = `
-    /* Scoped to #time-container to match your original */
-    #time-container { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 20px auto; text-align: center; }
-    #time-container h1 { margin-bottom: 75px; }
-    #time-container h3, #time-container h4 { margin-bottom: 15px; }
-    #time-container textarea { width: 100%; height: 100px; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; resize: none; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; }
-    #time-container #output { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; white-space: pre-wrap; min-height: 50px; font-family: 'Segoe UI', sans-serif; }
-    #time-container button { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; border: none; background: #8e9296; color: white; border-radius: 5px; cursor: pointer; font-family: 'Segoe UI', sans-serif; }
-    #time-container button:hover { background: #80b5eb; }
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
+    
+    #time-container {
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      text-align: center;
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    #time-container h1 { margin-bottom: 75px; color: #fff; }
+    #time-container h3, #time-container h4 {
+      margin-bottom: 15px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+    #time-container textarea {
+      width: 100%;
+      height: 100px;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 10px;
+      resize: none;
+      margin-bottom: 20px;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      background: rgba(15, 40, 50, 0.6);
+      color: #fff;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    #time-container textarea:focus {
+      outline: none;
+      border-color: #5eead4;
+      box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
+    }
+    #time-container textarea::placeholder { color: rgba(255, 255, 255, 0.4); }
+    #time-container #output {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(15, 40, 50, 0.5);
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      border-radius: 10px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      min-height: 50px;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    #time-container button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(94, 234, 212, 0.3);
+    }
+    #time-container button:hover {
+      background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(94, 234, 212, 0.4);
+    }
   `;
 
   const HTML = `

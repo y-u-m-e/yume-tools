@@ -28,20 +28,26 @@
   const CSS_ID = 'cruddy-panel-styles';
 
   const STYLE = `
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+    
     #cruddy-panel {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
       max-width: 1000px;
       margin: 20px auto;
-      padding: 20px;
-      background: #1a1a2e;
-      border-radius: 10px;
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       color: #eee;
     }
     #cruddy-panel * { box-sizing: border-box; }
     #cruddy-panel h2 {
       margin: 0 0 20px 0;
-      color: #80b5eb;
+      color: #5eead4;
       text-align: center;
+      font-weight: 600;
     }
     
     /* Auth screens */
@@ -55,11 +61,12 @@
     }
     #cruddy-panel .cp-auth-title {
       font-size: 24px;
-      color: #80b5eb;
+      color: #5eead4;
       margin-bottom: 10px;
+      font-weight: 600;
     }
     #cruddy-panel .cp-auth-message {
-      color: #888;
+      color: rgba(255, 255, 255, 0.6);
       margin-bottom: 30px;
       line-height: 1.6;
     }
@@ -71,20 +78,24 @@
       background: #5865F2;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 16px;
+      font-weight: 500;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.2s;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
     }
     #cruddy-panel .cp-discord-btn:hover {
       background: #4752C4;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
     }
     #cruddy-panel .cp-unauthorized {
-      background: linear-gradient(135deg, #2d1f1f 0%, #1a1a2e 100%);
+      background: linear-gradient(135deg, rgba(60, 30, 30, 0.7) 0%, rgba(40, 25, 50, 0.7) 100%);
     }
     #cruddy-panel .cp-unauthorized .cp-auth-icon {
-      color: #e74c3c;
+      color: #ef4444;
     }
     #cruddy-panel .cp-user-info {
       display: flex;
@@ -92,50 +103,65 @@
       justify-content: flex-end;
       gap: 10px;
       margin-bottom: 15px;
-      padding: 10px;
-      background: #2a2a4a;
-      border-radius: 8px;
+      padding: 12px 16px;
+      background: rgba(15, 40, 50, 0.5);
+      border-radius: 10px;
+      border: 1px solid rgba(94, 234, 212, 0.15);
     }
     #cruddy-panel .cp-user-avatar {
       width: 32px;
       height: 32px;
       border-radius: 50%;
+      border: 2px solid rgba(94, 234, 212, 0.3);
     }
     #cruddy-panel .cp-user-name {
       color: #eee;
       font-size: 14px;
+      font-weight: 500;
     }
     #cruddy-panel .cp-logout-btn {
-      padding: 6px 12px;
-      background: #555;
-      color: #eee;
-      border: none;
-      border-radius: 4px;
+      padding: 6px 14px;
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
       font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
+      transition: all 0.2s;
     }
     #cruddy-panel .cp-logout-btn:hover {
-      background: #666;
+      background: rgba(94, 234, 212, 0.25);
     }
     #cruddy-panel .cp-tabs {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 20px;
-      border-bottom: 2px solid #333;
-      padding-bottom: 10px;
+      border-bottom: 2px solid rgba(94, 234, 212, 0.15);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
     }
     #cruddy-panel .cp-tab {
-      padding: 10px 20px;
-      background: #2a2a4a;
-      border: none;
-      border-radius: 5px 5px 0 0;
-      color: #aaa;
+      padding: 10px 18px;
+      background: rgba(15, 40, 50, 0.5);
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      border-radius: 8px 8px 0 0;
+      color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
       font-size: 14px;
-      transition: all 0.2s;
+      font-weight: 500;
+      transition: all 0.3s;
+      font-family: inherit;
     }
-    #cruddy-panel .cp-tab:hover { background: #3a3a5a; color: #fff; }
-    #cruddy-panel .cp-tab.active { background: #80b5eb; color: #1a1a2e; }
+    #cruddy-panel .cp-tab:hover {
+      background: rgba(94, 234, 212, 0.1);
+      color: #fff;
+    }
+    #cruddy-panel .cp-tab.active {
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      border-color: transparent;
+    }
     #cruddy-panel .cp-panel { display: none; }
     #cruddy-panel .cp-panel.active { display: block; }
     
@@ -148,44 +174,60 @@
     }
     #cruddy-panel .cp-filters input,
     #cruddy-panel .cp-filters select {
-      padding: 8px 12px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      background: #2a2a4a;
+      padding: 10px 14px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 40, 50, 0.6);
       color: #eee;
       font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
     #cruddy-panel .cp-filters input:focus,
     #cruddy-panel .cp-filters select:focus {
       outline: none;
-      border-color: #80b5eb;
+      border-color: #5eead4;
+      box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
     }
-    #cruddy-panel .cp-filters input::placeholder { color: #777; }
+    #cruddy-panel .cp-filters input::placeholder { color: rgba(255, 255, 255, 0.4); }
     #cruddy-panel .cp-btn {
-      padding: 8px 16px;
+      padding: 10px 18px;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
-      transition: all 0.2s;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.3s;
     }
     #cruddy-panel .cp-btn-primary {
-      background: #80b5eb;
-      color: #1a1a2e;
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      box-shadow: 0 4px 15px rgba(94, 234, 212, 0.3);
     }
-    #cruddy-panel .cp-btn-primary:hover { background: #6aa5db; }
+    #cruddy-panel .cp-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(94, 234, 212, 0.4);
+    }
     #cruddy-panel .cp-btn-danger {
-      background: #e74c3c;
+      background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
       color: #fff;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
     }
-    #cruddy-panel .cp-btn-danger:hover { background: #c0392b; }
+    #cruddy-panel .cp-btn-danger:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
     #cruddy-panel .cp-btn-secondary {
-      background: #555;
-      color: #fff;
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
     }
-    #cruddy-panel .cp-btn-secondary:hover { background: #666; }
+    #cruddy-panel .cp-btn-secondary:hover {
+      background: rgba(94, 234, 212, 0.25);
+    }
     #cruddy-panel .cp-btn-sm {
-      padding: 4px 10px;
+      padding: 6px 12px;
       font-size: 12px;
     }
 
@@ -193,6 +235,8 @@
     #cruddy-panel .cp-table-wrap {
       overflow-x: auto;
       margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(94, 234, 212, 0.15);
     }
     #cruddy-panel table {
       width: 100%;
@@ -200,19 +244,19 @@
       font-size: 14px;
     }
     #cruddy-panel th, #cruddy-panel td {
-      padding: 10px 12px;
+      padding: 12px 14px;
       text-align: left;
-      border-bottom: 1px solid #333;
+      border-bottom: 1px solid rgba(94, 234, 212, 0.1);
     }
     #cruddy-panel th {
-      background: #2a2a4a;
-      color: #80b5eb;
+      background: rgba(15, 40, 50, 0.6);
+      color: #5eead4;
       font-weight: 600;
     }
-    #cruddy-panel tr:hover { background: #2a2a4a; }
+    #cruddy-panel tr:hover { background: rgba(94, 234, 212, 0.05); }
     #cruddy-panel .cp-actions {
       display: flex;
-      gap: 5px;
+      gap: 6px;
     }
 
     /* Form */
@@ -224,45 +268,54 @@
     #cruddy-panel .cp-form-group {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
     }
     #cruddy-panel .cp-form-group label {
       font-size: 14px;
-      color: #aaa;
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
     }
     #cruddy-panel .cp-form-group input {
-      padding: 10px 12px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      background: #2a2a4a;
+      padding: 12px 14px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 40, 50, 0.6);
       color: #eee;
       font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
     #cruddy-panel .cp-form-group input:focus {
       outline: none;
-      border-color: #80b5eb;
+      border-color: #5eead4;
+      box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
     }
 
     /* Modal */
     #cruddy-panel .cp-modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 20, 30, 0.8);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
     }
     #cruddy-panel .cp-modal {
-      background: #1a1a2e;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.95) 0%, rgba(25, 50, 80, 0.95) 100%);
+      backdrop-filter: blur(12px);
       padding: 25px;
-      border-radius: 10px;
+      border-radius: 16px;
       min-width: 400px;
       max-width: 90%;
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
     #cruddy-panel .cp-modal h3 {
       margin: 0 0 20px 0;
-      color: #80b5eb;
+      color: #5eead4;
+      font-weight: 600;
     }
     #cruddy-panel .cp-modal-actions {
       display: flex;
@@ -273,64 +326,78 @@
 
     /* Status messages */
     #cruddy-panel .cp-status {
-      padding: 10px 15px;
-      border-radius: 5px;
+      padding: 12px 16px;
+      border-radius: 10px;
       margin-bottom: 15px;
       font-size: 14px;
+      font-weight: 500;
     }
-    #cruddy-panel .cp-status.success { background: #27ae60; color: #fff; }
-    #cruddy-panel .cp-status.error { background: #e74c3c; color: #fff; }
-    #cruddy-panel .cp-status.info { background: #3498db; color: #fff; }
+    #cruddy-panel .cp-status.success {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    #cruddy-panel .cp-status.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    #cruddy-panel .cp-status.info {
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+    }
 
     /* Loading */
     #cruddy-panel .cp-loading {
       text-align: center;
       padding: 40px;
-      color: #777;
+      color: rgba(255, 255, 255, 0.5);
     }
     #cruddy-panel .cp-empty {
       text-align: center;
       padding: 40px;
-      color: #777;
+      color: rgba(255, 255, 255, 0.5);
     }
 
     /* Pagination */
     #cruddy-panel .cp-pagination {
       display: flex;
-      gap: 5px;
+      gap: 8px;
       justify-content: center;
       align-items: center;
       margin-top: 15px;
     }
     #cruddy-panel .cp-pagination span {
-      color: #777;
+      color: rgba(255, 255, 255, 0.6);
       font-size: 14px;
       margin: 0 10px;
     }
 
     /* Event Groups */
     #cruddy-panel .cp-event-group {
-      background: #2a2a4a;
-      border-radius: 8px;
-      margin-bottom: 15px;
+      background: rgba(15, 40, 50, 0.5);
+      border-radius: 12px;
+      margin-bottom: 12px;
       overflow: hidden;
+      border: 1px solid rgba(94, 234, 212, 0.15);
     }
     #cruddy-panel .cp-event-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px;
-      background: #3a3a5a;
+      padding: 15px 18px;
+      background: rgba(94, 234, 212, 0.08);
       cursor: pointer;
       transition: background 0.2s;
     }
     #cruddy-panel .cp-event-header:hover {
-      background: #4a4a6a;
+      background: rgba(94, 234, 212, 0.12);
     }
     #cruddy-panel .cp-event-title {
       font-size: 16px;
       font-weight: 600;
-      color: #80b5eb;
+      color: #5eead4;
     }
     #cruddy-panel .cp-event-meta {
       display: flex;
@@ -339,28 +406,28 @@
     }
     #cruddy-panel .cp-event-date {
       font-size: 13px;
-      color: #aaa;
+      color: rgba(255, 255, 255, 0.6);
     }
     #cruddy-panel .cp-event-count {
-      background: #80b5eb;
-      color: #1a1a2e;
-      padding: 3px 10px;
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      padding: 4px 12px;
       border-radius: 12px;
       font-size: 12px;
       font-weight: 600;
     }
     #cruddy-panel .cp-event-toggle {
-      color: #aaa;
+      color: rgba(255, 255, 255, 0.5);
       font-size: 18px;
-      transition: transform 0.2s;
+      transition: transform 0.3s;
     }
     #cruddy-panel .cp-event-group.expanded .cp-event-toggle {
       transform: rotate(180deg);
     }
     #cruddy-panel .cp-event-body {
       display: none;
-      padding: 15px;
-      border-top: 1px solid #444;
+      padding: 15px 18px;
+      border-top: 1px solid rgba(94, 234, 212, 0.1);
     }
     #cruddy-panel .cp-event-group.expanded .cp-event-body {
       display: block;
@@ -374,10 +441,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #1a1a2e;
-      padding: 6px 12px;
-      border-radius: 5px;
+      background: rgba(15, 40, 50, 0.6);
+      padding: 8px 14px;
+      border-radius: 8px;
       font-size: 13px;
+      border: 1px solid rgba(94, 234, 212, 0.1);
     }
     #cruddy-panel .cp-attendee-name {
       color: #eee;
@@ -387,14 +455,14 @@
       gap: 4px;
     }
     #cruddy-panel .cp-attendee-actions button {
-      padding: 2px 6px;
+      padding: 3px 8px;
       font-size: 10px;
     }
 
     /* Leaderboard */
     #cruddy-panel .cp-leaderboard-controls {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 20px;
       flex-wrap: wrap;
       align-items: flex-end;
@@ -402,38 +470,42 @@
     #cruddy-panel .cp-control-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
     #cruddy-panel .cp-control-group label {
       font-size: 12px;
-      color: #888;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
     }
     #cruddy-panel .cp-control-group select,
     #cruddy-panel .cp-control-group input {
-      padding: 8px 12px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      background: #2a2a4a;
+      padding: 10px 14px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 40, 50, 0.6);
       color: #eee;
       font-size: 14px;
+      font-family: inherit;
     }
     #cruddy-panel .cp-leaderboard {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
     #cruddy-panel .cp-leader-row {
       display: flex;
       align-items: center;
       gap: 15px;
-      padding: 12px 16px;
-      background: #2a2a4a;
-      border-radius: 8px;
-      transition: transform 0.2s, background 0.2s;
+      padding: 14px 18px;
+      background: rgba(15, 40, 50, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(94, 234, 212, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     #cruddy-panel .cp-leader-row:hover {
-      background: #3a3a5a;
-      transform: translateX(4px);
+      background: rgba(94, 234, 212, 0.1);
+      transform: translateX(6px);
+      border-color: rgba(94, 234, 212, 0.25);
     }
     #cruddy-panel .cp-leader-rank {
       font-size: 20px;
@@ -441,114 +513,57 @@
       width: 40px;
       text-align: center;
     }
-    #cruddy-panel .cp-leader-row:nth-child(1) .cp-leader-rank { color: #ffd700; }
-    #cruddy-panel .cp-leader-row:nth-child(2) .cp-leader-rank { color: #c0c0c0; }
-    #cruddy-panel .cp-leader-row:nth-child(3) .cp-leader-rank { color: #cd7f32; }
-    #cruddy-panel .cp-leader-row:nth-child(n+4) .cp-leader-rank { color: #666; }
+    #cruddy-panel .cp-leader-row:nth-child(1) .cp-leader-rank { color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+    #cruddy-panel .cp-leader-row:nth-child(2) .cp-leader-rank { color: #e0e0e0; text-shadow: 0 0 10px rgba(224, 224, 224, 0.4); }
+    #cruddy-panel .cp-leader-row:nth-child(3) .cp-leader-rank { color: #cd7f32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.4); }
+    #cruddy-panel .cp-leader-row:nth-child(n+4) .cp-leader-rank { color: rgba(255, 255, 255, 0.4); }
     #cruddy-panel .cp-leader-name {
       flex: 1;
       font-size: 16px;
       color: #eee;
+      font-weight: 500;
     }
     #cruddy-panel .cp-leader-count {
       font-size: 18px;
-      font-weight: 600;
-      color: #80b5eb;
+      font-weight: 700;
+      color: #5eead4;
     }
     #cruddy-panel .cp-leader-bar {
       flex: 0 0 200px;
       height: 8px;
-      background: #1a1a2e;
+      background: rgba(15, 40, 50, 0.6);
       border-radius: 4px;
       overflow: hidden;
     }
     #cruddy-panel .cp-leader-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #80b5eb, #5a9fd4);
+      background: linear-gradient(90deg, #2dd4bf, #5eead4);
       border-radius: 4px;
       transition: width 0.5s ease;
     }
     #cruddy-panel .cp-leaderboard-summary {
       margin-top: 20px;
-      padding: 15px;
-      background: #2a2a4a;
-      border-radius: 8px;
+      padding: 18px;
+      background: rgba(15, 40, 50, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(94, 234, 212, 0.15);
       display: flex;
-      gap: 30px;
+      gap: 40px;
       flex-wrap: wrap;
     }
     #cruddy-panel .cp-stat {
       text-align: center;
     }
     #cruddy-panel .cp-stat-value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 700;
-      color: #80b5eb;
+      color: #5eead4;
     }
     #cruddy-panel .cp-stat-label {
       font-size: 12px;
-      color: #888;
+      color: rgba(255, 255, 255, 0.5);
       text-transform: uppercase;
-    }
-
-    /* Duplicates */
-    #cruddy-panel .cp-dupe-group {
-      background: #2a2a4a;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      padding: 12px;
-    }
-    #cruddy-panel .cp-dupe-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #444;
-    }
-    #cruddy-panel .cp-dupe-info {
-      font-size: 14px;
-    }
-    #cruddy-panel .cp-dupe-info strong {
-      color: #80b5eb;
-    }
-    #cruddy-panel .cp-dupe-items {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    #cruddy-panel .cp-dupe-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: #1a1a2e;
-      border-radius: 5px;
-      font-size: 13px;
-    }
-    #cruddy-panel .cp-dupe-item.keep {
-      border: 2px solid #27ae60;
-      background: rgba(39, 174, 96, 0.1);
-    }
-    #cruddy-panel .cp-dupe-item .cp-dupe-id {
-      color: #666;
-      font-size: 12px;
-      width: 60px;
-    }
-    #cruddy-panel .cp-dupe-summary {
-      margin-bottom: 20px;
-      padding: 15px;
-      background: #3a3a5a;
-      border-radius: 8px;
-      text-align: center;
-    }
-    #cruddy-panel .cp-dupe-summary strong {
-      color: #e74c3c;
-    }
-    #cruddy-panel .cp-modal-scrollable {
-      max-height: 60vh;
-      overflow-y: auto;
-      margin: 15px 0;
+      letter-spacing: 0.5px;
     }
   `;
 
@@ -574,7 +589,6 @@
           <input type="date" id="cp-filter-end" title="End date">
           <button class="cp-btn cp-btn-primary" id="cp-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-clear-btn">Clear</button>
-          <button class="cp-btn cp-btn-danger" id="cp-find-dupes-btn" title="Find duplicate records">🔍 Find Duplicates</button>
         </div>
         <div class="cp-table-wrap">
           <table>
@@ -684,10 +698,10 @@
 
   // State
   let apiBase = '';
-  let records = [];
-  let eventGroups = [];
-  let allEventGroups = [];
-  let leaderboardData = [];
+  const records = [];
+  const eventGroups = [];
+  const allEventGroups = [];
+  const leaderboardData = [];
   let currentPage = 1;
   let eventCurrentPage = 1;
   const pageSize = 20;
@@ -957,117 +971,6 @@
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  async function findDuplicates(rootEl) {
-    // Fetch all records to find duplicates
-    const data = await fetchAllRecords({});
-    const allRecords = data.results || [];
-    
-    // Group by name+event+date
-    const groups = {};
-    for (const record of allRecords) {
-      const key = `${record.name.toLowerCase()}|||${record.event.toLowerCase()}|||${record.date}`;
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(record);
-    }
-    
-    // Filter to only groups with duplicates (more than 1 record)
-    // Sort each group by ID ascending so lowest ID is first (the one we keep)
-    const duplicates = Object.values(groups)
-      .filter(g => g.length > 1)
-      .map(g => g.sort((a, b) => a.id - b.id));
-    return duplicates;
-  }
-
-  function showDuplicatesModal(rootEl, duplicates) {
-    const totalDupes = duplicates.reduce((sum, g) => sum + g.length - 1, 0); // -1 because we keep one
-    
-    const overlay = document.createElement('div');
-    overlay.className = 'cp-modal-overlay';
-    overlay.innerHTML = `
-      <div class="cp-modal" style="min-width: 600px; max-width: 800px;">
-        <h3>🔍 Duplicate Records Found</h3>
-        ${duplicates.length === 0 ? `
-          <div class="cp-empty">✅ No duplicate records found!</div>
-          <div class="cp-modal-actions">
-            <button class="cp-btn cp-btn-secondary" id="cp-dupe-close">Close</button>
-          </div>
-        ` : `
-          <div class="cp-dupe-summary">
-            Found <strong>${duplicates.length}</strong> groups with duplicates 
-            (<strong>${totalDupes}</strong> extra records to remove)
-          </div>
-          <div class="cp-modal-scrollable">
-            ${duplicates.map((group, gIdx) => `
-              <div class="cp-dupe-group" data-group="${gIdx}">
-                <div class="cp-dupe-header">
-                  <div class="cp-dupe-info">
-                    <strong>${escapeHtml(group[0].name)}</strong> at 
-                    <strong>${escapeHtml(group[0].event)}</strong> on 
-                    <strong>${group[0].date}</strong>
-                  </div>
-                  <span>${group.length} records</span>
-                </div>
-                <div class="cp-dupe-items">
-                  ${group.map((r, idx) => `
-                    <div class="cp-dupe-item ${idx === 0 ? 'keep' : ''}" data-id="${r.id}">
-                      <span class="cp-dupe-id">#${r.id}</span>
-                      <span>${idx === 0 ? '✓ Keep (lowest ID)' : '🗑 Will be deleted'}</span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          <div class="cp-modal-actions">
-            <button class="cp-btn cp-btn-secondary" id="cp-dupe-close">Cancel</button>
-            <button class="cp-btn cp-btn-danger" id="cp-dupe-delete">🗑 Delete ${totalDupes} Duplicate${totalDupes !== 1 ? 's' : ''}</button>
-          </div>
-        `}
-      </div>
-    `;
-
-    rootEl.appendChild(overlay);
-
-    overlay.querySelector('#cp-dupe-close').onclick = () => overlay.remove();
-    
-    const deleteBtn = overlay.querySelector('#cp-dupe-delete');
-    if (deleteBtn) {
-      deleteBtn.onclick = async () => {
-        deleteBtn.disabled = true;
-        deleteBtn.textContent = 'Deleting...';
-        
-        let deleted = 0;
-        let errors = 0;
-        
-        for (const group of duplicates) {
-          // Keep the first (lowest ID), delete the rest
-          for (let i = 1; i < group.length; i++) {
-            try {
-              await deleteRecord(group[i].id);
-              deleted++;
-            } catch (err) {
-              errors++;
-              console.error(`Failed to delete record ${group[i].id}:`, err);
-            }
-          }
-        }
-        
-        overlay.remove();
-        
-        if (errors > 0) {
-          showStatus(rootEl, `Deleted ${deleted} duplicates, ${errors} failed`, 'error');
-        } else {
-          showStatus(rootEl, `Successfully deleted ${deleted} duplicate records!`, 'success');
-        }
-        
-        // Refresh the records view
-        loadRecords(rootEl);
-      };
-    }
-  }
-
   function showEditModal(rootEl, record, onSuccess = null) {
     const overlay = document.createElement('div');
     overlay.className = 'cp-modal-overlay';
@@ -1175,24 +1078,6 @@
       rootEl.querySelector('#cp-filter-end').value = '';
       currentPage = 1;
       loadRecords(rootEl);
-    };
-
-    // Find duplicates
-    rootEl.querySelector('#cp-find-dupes-btn').onclick = async () => {
-      const btn = rootEl.querySelector('#cp-find-dupes-btn');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = '🔍 Scanning...';
-      
-      try {
-        const duplicates = await findDuplicates(rootEl);
-        showDuplicatesModal(rootEl, duplicates);
-      } catch (err) {
-        showStatus(rootEl, 'Error finding duplicates: ' + err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
     };
 
     // Add record
@@ -1456,4 +1341,3 @@
 
   return { mount };
 });
-

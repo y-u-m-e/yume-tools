@@ -29,32 +29,103 @@
   const CSS_ID = 'event-parser-widget-styles';
 
   const STYLE = `
-    #event-parser { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 800px; margin: 20px auto; text-align: center; }
-    #event-parser h3, #event-parser h4 { margin-bottom: 15px; }
-    #event-parser textarea, #event-parser input { width: 100%; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px; font-family: 'Segoe UI', sans-serif; box-sizing: border-box; }
-    #event-parser #outputNames { margin-top: 20px; padding: 15px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; white-space: pre-wrap; min-height: 150px; font-family: 'Segoe UI', sans-serif; resize: none; }
-    #event-parser button { display: block; width: 100%; margin-top: 10px; padding: 10px; font-size: 16px; border: none; background: #8e9296; color: white; border-radius: 5px; cursor: pointer; font-family: 'Segoe UI', sans-serif; }
-    #event-parser button:hover { background: #80b5eb; }
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
+    
+    #event-parser {
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      text-align: center;
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    #event-parser h3, #event-parser h4 {
+      margin-bottom: 15px;
+      color: rgba(255, 255, 255, 0.9);
+      font-weight: 500;
+    }
+    #event-parser textarea, #event-parser input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 10px;
+      margin-bottom: 15px;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      box-sizing: border-box;
+      background: rgba(15, 40, 50, 0.6);
+      color: #fff;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    #event-parser textarea:focus, #event-parser input:focus {
+      outline: none;
+      border-color: #5eead4;
+      box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
+    }
+    #event-parser textarea::placeholder, #event-parser input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    #event-parser #outputNames {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(15, 40, 50, 0.5);
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      border-radius: 10px;
+      font-size: 16px;
+      white-space: pre-wrap;
+      min-height: 150px;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      resize: none;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    #event-parser button {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(94, 234, 212, 0.3);
+    }
+    #event-parser button:hover {
+      background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(94, 234, 212, 0.4);
+    }
     
     /* Modal styles */
     .ep-modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 20, 30, 0.8);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
     }
     .ep-modal {
-      background: #1a1a2e;
-      padding: 25px;
-      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.95) 0%, rgba(25, 50, 80, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      padding: 30px;
+      border-radius: 16px;
       max-width: 450px;
       width: 90%;
       text-align: center;
       color: #eee;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
     .ep-modal-icon {
       font-size: 48px;
@@ -62,14 +133,15 @@
     }
     .ep-modal h4 {
       margin: 0 0 15px 0;
-      color: #f5a623;
+      color: #5eead4;
       font-size: 20px;
+      font-weight: 600;
     }
     .ep-modal p {
       margin: 0 0 20px 0;
-      color: #bbb;
+      color: rgba(255, 255, 255, 0.7);
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .ep-modal-actions {
       display: flex;
@@ -79,28 +151,36 @@
     .ep-modal-btn {
       padding: 12px 20px;
       border: none;
-      border-radius: 6px;
+      border-radius: 10px;
       font-size: 14px;
+      font-weight: 500;
       cursor: pointer;
-      font-family: 'Segoe UI', sans-serif;
-      transition: all 0.2s;
+      font-family: 'Outfit', 'Segoe UI', sans-serif;
+      transition: all 0.3s;
     }
     .ep-modal-btn-primary {
-      background: #80b5eb;
-      color: #1a1a2e;
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      box-shadow: 0 4px 15px rgba(94, 234, 212, 0.3);
     }
-    .ep-modal-btn-primary:hover { background: #6aa5db; }
+    .ep-modal-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(94, 234, 212, 0.4);
+    }
     .ep-modal-btn-secondary {
-      background: #3a3a5a;
-      color: #eee;
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
     }
-    .ep-modal-btn-secondary:hover { background: #4a4a6a; }
+    .ep-modal-btn-secondary:hover {
+      background: rgba(94, 234, 212, 0.25);
+    }
     .ep-modal-btn-text {
       background: transparent;
-      color: #777;
+      color: rgba(255, 255, 255, 0.5);
       font-size: 12px;
     }
-    .ep-modal-btn-text:hover { color: #aaa; }
+    .ep-modal-btn-text:hover { color: rgba(255, 255, 255, 0.7); }
   `;
 
   const HTML = `
