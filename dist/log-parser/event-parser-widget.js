@@ -148,7 +148,7 @@
     const extractBtn = q('#extractBtn');
     const copyBtn = q('#copyBtn');
 
-    const webhookUrl = (opts && opts.webhook) || 'https://discord-relay.itai.app/';
+    const webhookUrl = (opts && opts.webhook) || 'https://api.itai.gg/';
 
 
     /**
