@@ -1,0 +1,41 @@
+name: Notify API to Update
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dist/**'
+
+jobs:
+  notify:
+    name: Trigger API SHA Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get commit SHA
+        id: sha
+        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Output SHA
+        run: |
+          echo "📦 New yume-tools commit: ${{ steps.sha.outputs.sha }}"
+          echo ""
+          echo "To update the API, run in yume-api repo:"
+          echo ""
+          echo "  Update wrangler.jsonc with SHA: ${{ steps.sha.outputs.sha }}"
+          echo "  npx wrangler deploy"
+          echo ""
+          echo "Or push to yume-api main branch to trigger auto-deploy."
+
+      - name: Create dispatch event to yume-api
+        if: ${{ secrets.YUME_API_DISPATCH_TOKEN }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.YUME_API_DISPATCH_TOKEN }}
+          repository: y-u-m-e/yume-api
+          event-type: tools-updated
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha }}"}'
+
