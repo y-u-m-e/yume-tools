@@ -230,11 +230,12 @@
         /Name\s*\|\s*Time\s*\|\s*Late/i,           // Table header
         /Present Members/i,                         // Common log header
         /Group attendance\s*\(\d+\)/i,              // Group attendance format
-        /^\s*\w+\s*\|\s*\d{1,2}:\d{2}\s*\|/m,      // Name | Time | Late row
-        /^\s*.+\s*-\s*\d{1,2}:\d{2}\s*$/m,         // Name - MM:SS format
+        /^.+\s*\|\s*\d{1,2}:\d{2}\s*\|/m,          // Name | Time | ... row (flexible spacing)
+        /^\s*.+\s+-\s+\d{1,2}:\d{2}\s*$/m,         // Name - MM:SS format
         /Event\s*name\s*:/i,                        // "Event name:" header
         /Hosted\s*by\s*:/i,                         // "Hosted by:" header
-        /Event\s*Duration\s*:/i                     // "Event Duration:" header
+        /Event\s*Duration\s*:/i,                    // "Event Duration:" header
+        /\|\s*-\s*$/m                               // Ends with | - (late column)
       ];
       return patterns.some(p => p.test(text));
     }
