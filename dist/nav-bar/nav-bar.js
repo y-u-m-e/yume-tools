@@ -16,119 +16,88 @@
   const CSS_ID = 'nav-bar-styles';
 
   const STYLE = `
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 
     .yume-nav {
-      font-family: 'Outfit', 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, rgba(20, 60, 60, 0.85) 0%, rgba(25, 50, 80, 0.85) 100%);
-      backdrop-filter: blur(12px);
-      border-radius: 16px;
-      padding: 8px 12px;
+      font-family: 'Space Mono', monospace;
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 32px;
       justify-content: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(94, 234, 212, 0.1);
-      border: 1px solid rgba(94, 234, 212, 0.2);
+      align-items: center;
+      padding: 16px 0;
     }
 
     .yume-nav-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 20px;
-      background: transparent;
-      border: none;
-      border-radius: 10px;
-      color: rgba(255, 255, 255, 0.6);
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-      overflow: hidden;
+      padding: 8px 0;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 400;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: color 0.3s ease;
     }
 
-    .yume-nav-item::before {
+    .yume-nav-item::after {
       content: '';
       position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(94, 234, 212, 0.15) 0%, rgba(45, 212, 191, 0.08) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      border-radius: 10px;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: #5eead4;
+      transition: width 0.3s ease;
     }
 
     .yume-nav-item:hover {
       color: rgba(255, 255, 255, 0.9);
-      transform: translateY(-1px);
     }
 
-    .yume-nav-item:hover::before {
-      opacity: 1;
+    .yume-nav-item:hover::after {
+      width: 100%;
     }
 
     .yume-nav-item.active {
       color: #5eead4;
-      background: linear-gradient(135deg, rgba(94, 234, 212, 0.2) 0%, rgba(45, 212, 191, 0.15) 100%);
-      box-shadow: 0 0 20px rgba(94, 234, 212, 0.15);
     }
 
-    .yume-nav-item.active::before {
-      opacity: 0;
+    .yume-nav-item.active::after {
+      width: 100%;
+      background: #5eead4;
+      box-shadow: 0 0 8px rgba(94, 234, 212, 0.5);
     }
 
+    /* Hide icons in minimal style */
     .yume-nav-icon {
-      font-size: 18px;
-      line-height: 1;
+      display: none;
     }
 
     .yume-nav-label {
       position: relative;
-      z-index: 1;
     }
 
     /* Sticky variant */
     .yume-nav.sticky {
       position: sticky;
-      top: 10px;
+      top: 20px;
       z-index: 1000;
-      margin: 10px auto;
-      max-width: fit-content;
     }
 
-    /* Compact variant for mobile */
+    /* Mobile */
     @media (max-width: 600px) {
       .yume-nav {
-        padding: 6px 8px;
-        gap: 4px;
+        gap: 20px;
+        flex-wrap: wrap;
       }
       .yume-nav-item {
-        padding: 10px 14px;
-        font-size: 13px;
+        font-size: 11px;
+        letter-spacing: 1.5px;
       }
-      .yume-nav-label {
-        display: none;
-      }
-      .yume-nav-icon {
-        font-size: 20px;
-      }
-    }
-
-    /* Glow effect on active */
-    .yume-nav-item.active::after {
-      content: '';
-      position: absolute;
-      bottom: 2px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #5eead4, transparent);
-      border-radius: 3px;
-      box-shadow: 0 0 12px rgba(94, 234, 212, 0.6);
     }
   `;
 
