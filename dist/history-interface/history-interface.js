@@ -458,7 +458,7 @@
     if (filters.event) params.append('event', filters.event);
     if (filters.start) params.append('start', filters.start);
     if (filters.end) params.append('end', filters.end);
-    params.append('limit', 1000); // Fetch more for grouping
+    params.append('limit', 5000); // Fetch all for grouping
 
     const url = `${apiBase}/attendance/records?${params.toString()}`;
     const resp = await fetch(url);
