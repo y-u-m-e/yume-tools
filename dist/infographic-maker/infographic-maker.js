@@ -1230,6 +1230,10 @@
             <div class="im-toolbar-group">
               <label>BG:</label>
               <input type="color" id="im-bg-color" value="#ffffff" class="im-color-input">
+              <label class="im-checkbox-label" style="margin-left: 8px;" title="Transparent background">
+                <input type="checkbox" id="im-bg-transparent">
+                <span style="font-size: 11px;">None</span>
+              </label>
             </div>
             <div style="flex:1;"></div>
             <div class="im-export-btns">
@@ -1324,6 +1328,7 @@
   let dragOffset = { x: 0, y: 0 };
   let zoom = 1;
   let bgColor = '#ffffff';
+  let bgTransparent = false;
 
   // Layer types
   const LAYER_TYPES = {
@@ -1589,8 +1594,11 @@
 
   function render() {
     // Clear canvas
-    ctx.fillStyle = bgColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!bgTransparent) {
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
     // Draw all layers
     layers.forEach(layer => drawLayer(layer));
@@ -2254,8 +2262,18 @@
     };
 
     // Background color
-    rootEl.querySelector('#im-bg-color').oninput = (e) => {
+    const bgColorInput = rootEl.querySelector('#im-bg-color');
+    const bgTransparentCheckbox = rootEl.querySelector('#im-bg-transparent');
+    
+    bgColorInput.oninput = (e) => {
       bgColor = e.target.value;
+      render();
+    };
+    
+    bgTransparentCheckbox.onchange = (e) => {
+      bgTransparent = e.target.checked;
+      bgColorInput.disabled = bgTransparent;
+      bgColorInput.style.opacity = bgTransparent ? '0.5' : '1';
       render();
     };
 
