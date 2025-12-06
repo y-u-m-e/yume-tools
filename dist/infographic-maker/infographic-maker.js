@@ -616,20 +616,57 @@
       
       .im-canvas-toolbar {
         flex-wrap: wrap;
-        gap: 6px;
-        padding: 8px;
+        gap: 8px;
+        padding: 10px;
       }
       
       .im-toolbar-group {
-        flex: 1 1 45%;
-        min-width: 80px;
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      
+      .im-toolbar-group label {
+        flex-shrink: 0;
+        font-size: 11px;
       }
       
       .im-toolbar-group select,
       .im-toolbar-group input {
-        width: 100%;
-        padding: 6px 8px;
+        flex: 1;
+        min-width: 0;
+        padding: 8px 10px;
         font-size: 12px;
+      }
+      
+      .im-toolbar-group input[type="color"] {
+        flex: 1;
+        min-width: 60px;
+        height: 36px;
+        padding: 2px;
+      }
+      
+      .im-toolbar-group input[type="range"] {
+        flex: 1;
+        min-width: 60px;
+      }
+      
+      /* Export buttons take full width row */
+      .im-export-btns {
+        flex: 1 1 100%;
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      
+      .im-export-btns .im-btn {
+        flex: 1;
+        padding: 10px 12px;
+        font-size: 12px;
+        text-align: center;
+        justify-content: center;
       }
       
       .im-toolbar-divider {
