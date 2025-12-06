@@ -31,15 +31,11 @@
 
     #infographic-maker {
       font-family: 'Outfit', sans-serif;
-      width: calc(100vw - 80px);
-      max-width: 1600px;
+      width: 100%;
       height: calc(100vh - 100px);
-      margin: 30px auto;
+      min-height: 500px;
       padding: 20px;
       overflow: hidden;
-      position: relative;
-      left: 50%;
-      transform: translateX(-50%);
       background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
       backdrop-filter: blur(12px);
       border-radius: 16px;
