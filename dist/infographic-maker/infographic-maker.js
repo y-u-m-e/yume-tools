@@ -1406,7 +1406,9 @@
     // Draw resize handles
     ctx.setLineDash([]);
     ctx.fillStyle = '#5eead4';
-    const handleSize = 8;
+    ctx.strokeStyle = '#0f2935';
+    ctx.lineWidth = 1;
+    const handleSize = 12;
     const handles = [
       { x: bounds.x - handleSize/2, y: bounds.y - handleSize/2 },
       { x: bounds.x + bounds.width/2 - handleSize/2, y: bounds.y - handleSize/2 },
@@ -1420,6 +1422,7 @@
 
     handles.forEach(h => {
       ctx.fillRect(h.x, h.y, handleSize, handleSize);
+      ctx.strokeRect(h.x, h.y, handleSize, handleSize);
     });
 
     ctx.restore();
@@ -1976,7 +1979,7 @@
     function getResizeHandle(x, y, layer) {
       if (!layer) return null;
       const bounds = getLayerBounds(layer);
-      const handleSize = 12;
+      const handleHitSize = 16; // Larger hit area for easier clicking
       const handles = [
         { name: 'nw', x: bounds.x, y: bounds.y },
         { name: 'ne', x: bounds.x + bounds.width, y: bounds.y },
@@ -1989,7 +1992,7 @@
       ];
       
       for (const h of handles) {
-        if (Math.abs(x - h.x) <= handleSize && Math.abs(y - h.y) <= handleSize) {
+        if (Math.abs(x - h.x) <= handleHitSize && Math.abs(y - h.y) <= handleHitSize) {
           return h.name;
         }
       }
