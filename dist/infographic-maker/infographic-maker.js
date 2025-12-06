@@ -1045,7 +1045,7 @@
             <div class="im-toolbar-divider"></div>
             <div class="im-toolbar-group">
               <label>BG:</label>
-              <input type="color" id="im-bg-color" value="#3d5c3d" class="im-color-input">
+              <input type="color" id="im-bg-color" value="#ffffff" class="im-color-input">
             </div>
             <div style="flex:1;"></div>
             <div class="im-export-btns">
@@ -1113,7 +1113,7 @@
   let dragStart = { x: 0, y: 0 };
   let dragOffset = { x: 0, y: 0 };
   let zoom = 1;
-  let bgColor = '#3d5c3d';
+  let bgColor = '#ffffff';
 
   // Layer types
   const LAYER_TYPES = {
