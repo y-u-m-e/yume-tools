@@ -1359,8 +1359,9 @@
       y: props.y || 100,
       width: props.width || 200,
       height: props.height || 100,
-      rotation: 0,
-      opacity: 1,
+      rotation: props.rotation || 0,
+      blur: props.blur || 0,
+      opacity: props.opacity || 1,
       visible: true,
       locked: false,
       name: props.name || `${type} ${layers.length + 1}`
@@ -1430,6 +1431,21 @@
 
     ctx.save();
     ctx.globalAlpha = layer.opacity;
+    
+    // Apply blur
+    if (layer.blur > 0) {
+      ctx.filter = `blur(${layer.blur}px)`;
+    }
+    
+    // Apply rotation around center of layer
+    if (layer.rotation !== 0) {
+      const bounds = getLayerBounds(layer);
+      const centerX = bounds.x + bounds.width / 2;
+      const centerY = bounds.y + bounds.height / 2;
+      ctx.translate(centerX, centerY);
+      ctx.rotate((layer.rotation * Math.PI) / 180);
+      ctx.translate(-centerX, -centerY);
+    }
 
     switch (layer.type) {
       case LAYER_TYPES.RECT:
@@ -1681,7 +1697,18 @@
     html += `
         <div class="im-prop-row">
           <span class="im-prop-label">Opacity</span>
-          <input type="range" min="0" max="1" step="0.1" data-prop="opacity" value="${layer.opacity}" style="flex:1;">
+          <input type="range" class="im-slider" min="0" max="1" step="0.1" data-prop="opacity" value="${layer.opacity}">
+          <span class="im-slider-value">${Math.round(layer.opacity * 100)}%</span>
+        </div>
+        <div class="im-prop-row">
+          <span class="im-prop-label">Rotation</span>
+          <input type="range" class="im-slider" min="-180" max="180" step="1" data-prop="rotation" value="${layer.rotation}">
+          <span class="im-slider-value">${layer.rotation}°</span>
+        </div>
+        <div class="im-prop-row">
+          <span class="im-prop-label">Blur</span>
+          <input type="range" class="im-slider" min="0" max="20" step="1" data-prop="blur" value="${layer.blur}">
+          <span class="im-slider-value">${layer.blur}px</span>
         </div>
       </div>
     `;
@@ -1840,7 +1867,7 @@
           value = e.target.checked;
         }
         // Convert to number for numeric properties
-        else if (['x', 'y', 'x2', 'y2', 'width', 'height', 'fontSize', 'strokeWidth', 'borderRadius', 'radius', 'opacity', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY'].includes(prop)) {
+        else if (['x', 'y', 'x2', 'y2', 'width', 'height', 'fontSize', 'strokeWidth', 'borderRadius', 'radius', 'opacity', 'rotation', 'blur', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY'].includes(prop)) {
           value = parseFloat(value);
         }
         
@@ -1851,7 +1878,14 @@
         if (e.target.type === 'range' && e.target.classList.contains('im-slider')) {
           const valueLabel = e.target.nextElementSibling;
           if (valueLabel && valueLabel.classList.contains('im-slider-value')) {
-            valueLabel.textContent = value + 'px';
+            // Use appropriate unit based on property
+            if (prop === 'opacity') {
+              valueLabel.textContent = Math.round(value * 100) + '%';
+            } else if (prop === 'rotation') {
+              valueLabel.textContent = value + '°';
+            } else {
+              valueLabel.textContent = value + 'px';
+            }
           }
         }
         
