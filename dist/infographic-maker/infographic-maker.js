@@ -1012,6 +1012,109 @@
         display: none !important;
       }
     }
+    
+    /* Skill Icons Modal */
+    .im-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 20, 30, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    
+    .im-modal {
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .im-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(94, 234, 212, 0.2);
+      background: rgba(15, 40, 50, 0.5);
+    }
+    
+    .im-modal-header h3 {
+      margin: 0;
+      color: #5eead4;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .im-modal-close {
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .im-modal-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    
+    .im-modal-content {
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .im-skill-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+      gap: 10px;
+    }
+    
+    .im-skill-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 6px;
+      background: rgba(15, 40, 50, 0.6);
+      border: 1px solid rgba(94, 234, 212, 0.15);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .im-skill-item:hover {
+      background: rgba(94, 234, 212, 0.15);
+      border-color: rgba(94, 234, 212, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .im-skill-item img {
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+      margin-bottom: 6px;
+    }
+    
+    .im-skill-item span {
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      line-height: 1.2;
+    }
   `;
 
   const HTML = `
@@ -1065,33 +1168,7 @@
                 <button class="im-preset-btn" data-preset="osrs-border-pink">Pink Border</button>
               </div>
               <div style="margin-top: 10px;">
-                <label style="font-size: 11px; color: rgba(255,255,255,0.6); display: block; margin-bottom: 4px;">Skill Icons</label>
-                <select id="im-skill-icon-select" class="im-prop-input" style="width: 100%;">
-                  <option value="">Select a skill...</option>
-                  <option value="Agility_icon">Agility</option>
-                  <option value="Attack_icon">Attack</option>
-                  <option value="Construction_icon">Construction</option>
-                  <option value="Cooking_icon">Cooking</option>
-                  <option value="Crafting_icon">Crafting</option>
-                  <option value="Defence_icon">Defence</option>
-                  <option value="Farming_icon">Farming</option>
-                  <option value="Firemaking_icon">Firemaking</option>
-                  <option value="Fishing_icon">Fishing</option>
-                  <option value="Fletching_icon">Fletching</option>
-                  <option value="Herblore_icon">Herblore</option>
-                  <option value="Hitpoints_icon">Hitpoints</option>
-                  <option value="Hunter_icon">Hunter</option>
-                  <option value="Magic_icon">Magic</option>
-                  <option value="Mining_icon">Mining</option>
-                  <option value="Prayer_icon">Prayer</option>
-                  <option value="Ranged_icon">Ranged</option>
-                  <option value="Runecraft_icon">Runecraft</option>
-                  <option value="Slayer_icon">Slayer</option>
-                  <option value="Smithing_icon">Smithing</option>
-                  <option value="Strength_icon">Strength</option>
-                  <option value="Thieving_icon">Thieving</option>
-                  <option value="Woodcutting_icon">Woodcutting</option>
-                </select>
+                <button class="im-btn im-btn-secondary" id="im-skill-icons-btn" style="width: 100%;">⚔️ Skill Icons</button>
               </div>
             </div>
           </div>
@@ -1192,6 +1269,19 @@
       
       <!-- Mobile Properties Toggle -->
       <button class="im-mobile-props-toggle" id="im-mobile-props-toggle">⚙️ Properties</button>
+      
+      <!-- Skill Icons Modal -->
+      <div class="im-modal-overlay" id="im-skill-modal" style="display:none;">
+        <div class="im-modal">
+          <div class="im-modal-header">
+            <h3>⚔️ Skill Icons</h3>
+            <button class="im-modal-close" id="im-skill-modal-close">✕</button>
+          </div>
+          <div class="im-modal-content">
+            <div class="im-skill-grid" id="im-skill-grid"></div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -1915,36 +2005,92 @@
       btn.onclick = () => addPreset(btn.dataset.preset, rootEl);
     });
 
-    // Skill icon select
-    const skillIconSelect = rootEl.querySelector('#im-skill-icon-select');
-    if (skillIconSelect) {
-      skillIconSelect.onchange = async (e) => {
-        const iconName = e.target.value;
-        if (!iconName) return;
+    // Skill icons modal
+    const skillModal = rootEl.querySelector('#im-skill-modal');
+    const skillGrid = rootEl.querySelector('#im-skill-grid');
+    const skillIconsBtn = rootEl.querySelector('#im-skill-icons-btn');
+    const skillModalClose = rootEl.querySelector('#im-skill-modal-close');
+    
+    const SKILL_ICONS = [
+      { name: 'Attack', file: 'Attack_icon' },
+      { name: 'Strength', file: 'Strength_icon' },
+      { name: 'Defence', file: 'Defence_icon' },
+      { name: 'Ranged', file: 'Ranged_icon' },
+      { name: 'Prayer', file: 'Prayer_icon' },
+      { name: 'Magic', file: 'Magic_icon' },
+      { name: 'Runecraft', file: 'Runecraft_icon' },
+      { name: 'Construction', file: 'Construction_icon' },
+      { name: 'Hitpoints', file: 'Hitpoints_icon' },
+      { name: 'Agility', file: 'Agility_icon' },
+      { name: 'Herblore', file: 'Herblore_icon' },
+      { name: 'Thieving', file: 'Thieving_icon' },
+      { name: 'Crafting', file: 'Crafting_icon' },
+      { name: 'Fletching', file: 'Fletching_icon' },
+      { name: 'Slayer', file: 'Slayer_icon' },
+      { name: 'Hunter', file: 'Hunter_icon' },
+      { name: 'Mining', file: 'Mining_icon' },
+      { name: 'Smithing', file: 'Smithing_icon' },
+      { name: 'Fishing', file: 'Fishing_icon' },
+      { name: 'Cooking', file: 'Cooking_icon' },
+      { name: 'Firemaking', file: 'Firemaking_icon' },
+      { name: 'Woodcutting', file: 'Woodcutting_icon' },
+      { name: 'Farming', file: 'Farming_icon' }
+    ];
+    
+    // Populate skill grid
+    skillGrid.innerHTML = SKILL_ICONS.map(skill => `
+      <div class="im-skill-item" data-skill="${skill.file}">
+        <img src="https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Skill_Icons/${skill.file}.png" alt="${skill.name}">
+        <span>${skill.name}</span>
+      </div>
+    `).join('');
+    
+    // Open modal
+    skillIconsBtn.onclick = () => {
+      skillModal.style.display = 'flex';
+    };
+    
+    // Close modal
+    skillModalClose.onclick = () => {
+      skillModal.style.display = 'none';
+    };
+    
+    // Close on overlay click
+    skillModal.onclick = (e) => {
+      if (e.target === skillModal) {
+        skillModal.style.display = 'none';
+      }
+    };
+    
+    // Handle skill selection
+    skillGrid.onclick = async (e) => {
+      const skillItem = e.target.closest('.im-skill-item');
+      if (!skillItem) return;
+      
+      const iconName = skillItem.dataset.skill;
+      
+      try {
+        const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Skill_Icons/${iconName}.png`;
+        const img = await loadImage(iconUrl);
+        const layer = createLayer(LAYER_TYPES.IMAGE, {
+          name: iconName.replace('_icon', '').replace('_', ' '),
+          image: img,
+          src: iconUrl,
+          width: img.width,
+          height: img.height
+        });
+        layers.push(layer);
+        selectedLayerIdx = layers.length - 1;
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
         
-        try {
-          const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Skill_Icons/${iconName}.png`;
-          const img = await loadImage(iconUrl);
-          const layer = createLayer(LAYER_TYPES.IMAGE, {
-            name: iconName.replace('_icon', '').replace('_', ' '),
-            image: img,
-            src: iconUrl,
-            width: img.width,
-            height: img.height
-          });
-          layers.push(layer);
-          selectedLayerIdx = layers.length - 1;
-          render();
-          renderLayersList(rootEl);
-          renderProperties(rootEl);
-        } catch (err) {
-          console.error('Failed to load skill icon:', err);
-        }
-        
-        // Reset dropdown
-        e.target.value = '';
-      };
-    }
+        // Close modal after selection
+        skillModal.style.display = 'none';
+      } catch (err) {
+        console.error('Failed to load skill icon:', err);
+      }
+    };
 
     // Canvas size
     const sizeSelect = rootEl.querySelector('#im-canvas-size');
