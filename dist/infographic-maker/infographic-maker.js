@@ -1162,7 +1162,7 @@
               <div class="im-presets">
                 <button class="im-preset-btn" id="im-skill-icons-btn">⚔️ Skills</button>
                 <button class="im-preset-btn" id="im-prayer-icons-btn">🙏 Prayers</button>
-                <button class="im-preset-btn" data-preset="osrs-inventory">🎒 Inventory BG</button>
+                <button class="im-preset-btn" data-preset="osrs-inventory">📊 Poll Backdrop</button>
               </div>
             </div>
           </div>
@@ -1907,7 +1907,7 @@
         try {
           const invImg = await loadImage('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png');
           layer = createLayer(LAYER_TYPES.IMAGE, {
-            name: 'Inventory Backdrop',
+            name: 'Poll Backdrop',
             image: invImg,
             src: 'https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png',
             width: invImg.width,
@@ -1917,7 +1917,7 @@
           console.error('Failed to load inventory preset:', err);
           // Fallback to rectangle
           layer = createLayer(LAYER_TYPES.RECT, {
-            name: 'Inventory Backdrop',
+            name: 'Poll Backdrop',
             width: 250,
             height: 300,
             fill: 'rgba(60, 50, 40, 0.8)',
