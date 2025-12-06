@@ -578,9 +578,11 @@
       
       #infographic-maker {
         padding: 10px;
+        padding-bottom: 70px; /* Space for floating button */
         height: auto;
         min-height: auto;
         border-radius: 12px;
+        position: relative;
       }
       
       #infographic-maker h2 {
@@ -737,23 +739,27 @@
         z-index: 1;
       }
       
-      /* Mobile properties toggle button */
+      /* Mobile properties toggle button - use absolute since transform breaks fixed */
+      #infographic-maker {
+        position: relative;
+      }
+      
       .im-mobile-props-toggle {
         display: flex !important;
         align-items: center;
         justify-content: center;
         gap: 6px;
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
         z-index: 999;
-        padding: 14px 20px;
+        padding: 12px 18px;
         background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
         border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 50px;
         color: #fff;
         font-family: 'Outfit', sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         box-shadow: 0 4px 20px rgba(20, 184, 166, 0.5);
         cursor: pointer;
