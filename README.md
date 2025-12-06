@@ -21,7 +21,7 @@ Frontend widgets for OSRS clan management on [yumes-tools.itai.gg](https://yumes
 
 ## 📚 Documentation
 
-Full docs at [y-u-m-e.github.io/yume-api](https://y-u-m-e.github.io/yume-api)
+Full docs at [api.itai.gg/docs](https://api.itai.gg/docs) 🔒 (requires Discord login)
 
 ## 🔗 Related
 
