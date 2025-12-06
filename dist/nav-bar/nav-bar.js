@@ -106,6 +106,7 @@
     { id: 'msg-maker', hash: '#msg-maker', icon: '💬', label: 'Mentions' },
     { id: 'log-maker', hash: '#log-maker', icon: '📋', label: 'Event Logs' },
     { id: 'infographic', hash: '#infographic', icon: '🎨', label: 'Infographic' },
+    { id: 'docs', url: 'https://api.itai.gg/docs/', icon: '📚', label: 'Docs', external: true },
     { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '🗃️', label: 'Cruddy Panel' }
   ];
 
@@ -132,9 +133,10 @@
       <nav class="yume-nav ${sticky ? 'sticky' : ''}">
         ${NAV_ITEMS.map(item => `
           <a 
-            href="${baseUrl}${item.hash}" 
+            href="${item.external ? item.url : baseUrl + item.hash}" 
             class="yume-nav-item ${activeId === item.id ? 'active' : ''}"
             data-id="${item.id}"
+            ${item.external ? 'target="_blank" rel="noopener noreferrer"' : ''}
           >
             <span class="yume-nav-icon">${item.icon}</span>
             <span class="yume-nav-label">${item.label}</span>
