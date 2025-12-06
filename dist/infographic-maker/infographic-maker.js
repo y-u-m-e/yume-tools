@@ -26,7 +26,7 @@
     /* OSRS-style font */
     @font-face {
       font-family: 'RuneScape UF';
-      src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@5ebfb30/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
+      src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@8f91a2e/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
       font-display: swap;
       font-weight: normal;
       font-style: normal;
