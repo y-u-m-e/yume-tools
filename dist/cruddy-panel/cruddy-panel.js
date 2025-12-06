@@ -416,6 +416,14 @@
       font-size: 12px;
       font-weight: 600;
     }
+    #cruddy-panel .cp-btn-copy {
+      background: rgba(88, 101, 242, 0.2);
+      color: #818cf8;
+      border: 1px solid rgba(88, 101, 242, 0.3);
+    }
+    #cruddy-panel .cp-btn-copy:hover {
+      background: rgba(88, 101, 242, 0.3);
+    }
     #cruddy-panel .cp-event-toggle {
       color: rgba(255, 255, 255, 0.5);
       font-size: 18px;
@@ -818,6 +826,7 @@
           <div class="cp-event-meta">
             <span class="cp-event-date">${group.date}</span>
             <span class="cp-event-count">${group.attendees.length} attendee${group.attendees.length !== 1 ? 's' : ''}</span>
+            <button class="cp-btn cp-btn-copy cp-btn-sm cp-event-copy" title="Copy ingots command">📋</button>
             <button class="cp-btn cp-btn-danger cp-btn-sm cp-event-delete" title="Delete entire event">🗑</button>
             <span class="cp-event-toggle">▼</span>
           </div>
@@ -1181,6 +1190,19 @@
       const groupIdx = parseInt(groupEl.dataset.idx);
       const group = allEventGroups[groupIdx];
       if (!group) return;
+
+      // Copy ingots command
+      if (e.target.classList.contains('cp-event-copy')) {
+        const players = group.attendees.map(a => a.name).join(', ');
+        const command = `/add_remove_ingots players:${players} ingots: 10,000 reason: clan event - ${group.event}`;
+        try {
+          await navigator.clipboard.writeText(command);
+          showStatus(rootEl, 'Ingots command copied to clipboard!', 'success');
+        } catch (err) {
+          showStatus(rootEl, 'Failed to copy to clipboard', 'error');
+        }
+        return;
+      }
 
       // Delete entire event
       if (e.target.classList.contains('cp-event-delete')) {
