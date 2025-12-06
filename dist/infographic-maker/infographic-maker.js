@@ -536,13 +536,13 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 15px;
-        margin: -15px -15px 15px -15px;
-        background: rgba(15, 40, 50, 0.95);
+        padding: 15px;
+        margin: 0 -15px 15px -15px;
+        background: rgba(15, 40, 50, 0.98);
         border-bottom: 1px solid rgba(94, 234, 212, 0.2);
         position: sticky;
-        top: -15px;
-        z-index: 2;
+        top: 0;
+        z-index: 10;
       }
       .im-props-mobile-header span {
         font-weight: 600;
@@ -748,19 +748,27 @@
         left: 0;
         right: 0;
         width: 100%;
-        height: auto;
-        max-height: 60vh;
+        height: 75vh;
+        max-height: 75vh;
         background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
         backdrop-filter: blur(12px);
         border-top: 2px solid rgba(94, 234, 212, 0.4);
         border-radius: 16px 16px 0 0;
         padding: 15px;
+        padding-top: 0;
         z-index: 1000;
         overflow-y: auto;
         display: none;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-        transform: translateY(0);
-        transition: transform 0.3s ease-out;
+      }
+      
+      .im-properties .im-panel {
+        margin-bottom: 10px;
+      }
+      
+      .im-properties #im-props-content {
+        max-height: none;
+        overflow: visible;
       }
       
       .im-properties.mobile-open {
@@ -768,12 +776,8 @@
       }
       
       .im-properties .im-panel-header {
-        position: sticky;
-        top: -15px;
-        margin: -15px -15px 10px -15px;
-        padding: 12px 15px;
+        padding: 10px 12px;
         background: rgba(15, 40, 50, 0.95);
-        z-index: 1;
       }
       
       /* Mobile properties toggle button - use absolute since transform breaks fixed */
