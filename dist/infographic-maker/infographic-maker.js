@@ -283,24 +283,24 @@
       flex: 1;
       background: repeating-conic-gradient(#1a1a1a 0% 25%, #222 0% 50%) 50% / 20px 20px;
       border-radius: 10px;
-      overflow: auto;
-      padding: 20px;
+      overflow: hidden;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       min-height: 400px;
-      max-height: 600px;
     }
 
     .im-canvas-container {
       position: relative;
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      display: inline-block;
-      margin: 0 auto;
+      max-width: 100%;
+      max-height: 100%;
     }
 
     #im-canvas {
       display: block;
       cursor: crosshair;
-      max-width: 100%;
-      height: auto;
     }
 
     /* Properties panel */
@@ -1181,6 +1181,26 @@
   function wire(rootEl) {
     canvas = rootEl.querySelector('#im-canvas');
     ctx = canvas.getContext('2d');
+    const canvasWrap = rootEl.querySelector('.im-canvas-wrap');
+    const canvasContainer = rootEl.querySelector('.im-canvas-container');
+
+    // Auto-scale canvas to fit container
+    function fitCanvasToContainer() {
+      const wrapRect = canvasWrap.getBoundingClientRect();
+      const availableWidth = wrapRect.width - 30; // padding
+      const availableHeight = wrapRect.height - 30;
+      
+      const scaleX = availableWidth / canvas.width;
+      const scaleY = availableHeight / canvas.height;
+      const autoScale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+      
+      canvas.style.width = (canvas.width * autoScale * zoom) + 'px';
+      canvas.style.height = (canvas.height * autoScale * zoom) + 'px';
+    }
+
+    // Fit on load and resize
+    fitCanvasToContainer();
+    window.addEventListener('resize', fitCanvasToContainer);
 
     // Initial render
     render();
@@ -1207,14 +1227,14 @@
         canvas.width = w;
         canvas.height = h;
         render();
+        fitCanvasToContainer();
       }
     };
 
     // Zoom
     rootEl.querySelector('#im-zoom').onchange = (e) => {
       zoom = parseFloat(e.target.value);
-      canvas.style.transform = `scale(${zoom})`;
-      canvas.style.transformOrigin = 'top left';
+      fitCanvasToContainer();
     };
 
     // Background color
@@ -1226,10 +1246,19 @@
     // Canvas mouse events
     let startLayer = null;
 
-    canvas.onmousedown = (e) => {
+    // Get mouse coordinates accounting for canvas scaling
+    function getCanvasCoords(e) {
       const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / zoom;
-      const y = (e.clientY - rect.top) / zoom;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
+    canvas.onmousedown = (e) => {
+      const { x, y } = getCanvasCoords(e);
 
       if (currentTool === 'select') {
         // Find clicked layer (top to bottom)
@@ -1277,9 +1306,7 @@
     canvas.onmousemove = (e) => {
       if (!isDragging) return;
 
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / zoom;
-      const y = (e.clientY - rect.top) / zoom;
+      const { x, y } = getCanvasCoords(e);
 
       if (currentTool === 'select' && selectedLayerIdx >= 0) {
         const layer = layers[selectedLayerIdx];
