@@ -513,20 +513,21 @@
         left: 0;
         right: 0;
         width: 100%;
-        height: auto;
-        max-height: 50vh;
+        height: 80vh;
+        max-height: 80vh;
         background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
         backdrop-filter: blur(12px);
         border-top: 1px solid rgba(94, 234, 212, 0.3);
         border-radius: 16px 16px 0 0;
-        padding: 15px;
+        padding: 0 15px 15px 15px;
         z-index: 1000;
         overflow-y: auto;
         display: none;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
       }
       .im-properties.mobile-open {
-        display: block;
+        display: flex;
+        flex-direction: column;
       }
       .im-mobile-props-toggle {
         display: flex !important;
@@ -543,6 +544,7 @@
         position: sticky;
         top: 0;
         z-index: 10;
+        flex-shrink: 0;
       }
       .im-props-mobile-header span {
         font-weight: 600;
@@ -563,6 +565,13 @@
       }
       .im-props-close-btn:hover {
         transform: scale(1.05);
+      }
+      .im-properties .im-panel {
+        flex-shrink: 0;
+      }
+      .im-properties #im-props-content {
+        max-height: none;
+        overflow: visible;
       }
     }
 
@@ -748,31 +757,32 @@
         left: 0;
         right: 0;
         width: 100%;
-        height: 75vh;
-        max-height: 75vh;
+        height: 80vh;
+        max-height: 80vh;
         background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
         backdrop-filter: blur(12px);
         border-top: 2px solid rgba(94, 234, 212, 0.4);
         border-radius: 16px 16px 0 0;
-        padding: 15px;
-        padding-top: 0;
+        padding: 0 15px 15px 15px;
         z-index: 1000;
         overflow-y: auto;
         display: none;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
       }
       
+      .im-properties.mobile-open {
+        display: flex;
+        flex-direction: column;
+      }
+      
       .im-properties .im-panel {
         margin-bottom: 10px;
+        flex-shrink: 0;
       }
       
       .im-properties #im-props-content {
         max-height: none;
         overflow: visible;
-      }
-      
-      .im-properties.mobile-open {
-        display: block;
       }
       
       .im-properties .im-panel-header {
