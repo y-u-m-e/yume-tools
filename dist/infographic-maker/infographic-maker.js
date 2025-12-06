@@ -531,6 +531,39 @@
       .im-mobile-props-toggle {
         display: flex !important;
       }
+      /* Mobile properties header */
+      .im-props-mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 15px;
+        margin: -15px -15px 15px -15px;
+        background: rgba(15, 40, 50, 0.95);
+        border-bottom: 1px solid rgba(94, 234, 212, 0.2);
+        position: sticky;
+        top: -15px;
+        z-index: 2;
+      }
+      .im-props-mobile-header span {
+        font-weight: 600;
+        color: #5eead4;
+        font-size: 14px;
+      }
+      .im-props-close-btn {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border: none;
+        border-radius: 20px;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .im-props-close-btn:hover {
+        transform: scale(1.05);
+      }
     }
 
     /* Responsive - Mobile */
@@ -772,9 +805,12 @@
       }
     }
     
-    /* Desktop: hide mobile toggle */
+    /* Desktop: hide mobile toggle and mobile header */
     @media (min-width: 1201px) {
       .im-mobile-props-toggle {
+        display: none !important;
+      }
+      .im-props-mobile-header {
         display: none !important;
       }
     }
@@ -892,6 +928,12 @@
 
         <!-- Right - Properties -->
         <div class="im-properties">
+          <!-- Mobile close header -->
+          <div class="im-props-mobile-header">
+            <span>⚙️ Properties</span>
+            <button class="im-props-close-btn" id="im-props-close-btn">✕ Close</button>
+          </div>
+          
           <div class="im-panel">
             <div class="im-panel-header">⬆ Upload Image</div>
             <div class="im-panel-content">
@@ -1884,12 +1926,28 @@
     // Mobile properties toggle
     const mobileToggle = rootEl.querySelector('#im-mobile-props-toggle');
     const propsPanel = rootEl.querySelector('.im-properties');
+    const propsCloseBtn = rootEl.querySelector('#im-props-close-btn');
+    
+    function closePropsPanel() {
+      if (propsPanel) {
+        propsPanel.classList.remove('mobile-open');
+        if (mobileToggle) {
+          mobileToggle.classList.remove('open');
+          mobileToggle.innerHTML = '⚙️ Properties';
+        }
+      }
+    }
+    
     if (mobileToggle && propsPanel) {
       mobileToggle.onclick = () => {
         const isOpen = propsPanel.classList.toggle('mobile-open');
         mobileToggle.classList.toggle('open', isOpen);
         mobileToggle.innerHTML = isOpen ? '✕ Close' : '⚙️ Properties';
       };
+    }
+    
+    if (propsCloseBtn) {
+      propsCloseBtn.onclick = closePropsPanel;
     }
   }
 
