@@ -105,7 +105,7 @@
     { id: 'home', hash: '#home', icon: '🏠', label: 'Home' },
     { id: 'msg-maker', hash: '#msg-maker', icon: '💬', label: 'Mentions' },
     { id: 'log-maker', hash: '#log-maker', icon: '📋', label: 'Event Logs' },
-    { id: 'infographic', hash: '#infographic', icon: '🎨', label: 'Infographic' },
+    { id: 'infographic-maker', hash: '#infographic-maker', icon: '🎨', label: 'Infographic Maker' },
     { id: 'docs', url: 'https://api.itai.gg/docs/', icon: '📚', label: 'Docs', external: true },
     { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '🗃️', label: 'Cruddy Panel' }
   ];
