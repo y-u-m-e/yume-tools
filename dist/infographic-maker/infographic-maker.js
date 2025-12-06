@@ -31,12 +31,15 @@
 
     #infographic-maker {
       font-family: 'Outfit', sans-serif;
-      width: calc(100vw - 60px);
-      max-width: 1800px;
-      height: calc(100vh - 120px);
-      margin: 20px auto;
+      width: calc(100vw - 80px);
+      max-width: 1600px;
+      height: calc(100vh - 100px);
+      margin: 30px auto;
       padding: 20px;
       overflow: hidden;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
       background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
       backdrop-filter: blur(12px);
       border-radius: 16px;
@@ -566,13 +569,8 @@
             <div class="im-toolbar-divider"></div>
             <div class="im-toolbar-group">
               <label>Zoom:</label>
-              <select id="im-zoom">
-                <option value="0.5">50%</option>
-                <option value="0.75">75%</option>
-                <option value="1" selected>100%</option>
-                <option value="1.5">150%</option>
-                <option value="2">200%</option>
-              </select>
+              <input type="range" id="im-zoom" min="25" max="200" value="100" style="width:100px;">
+              <span id="im-zoom-label">100%</span>
             </div>
             <div class="im-toolbar-divider"></div>
             <div class="im-toolbar-group">
@@ -1242,8 +1240,11 @@
     };
 
     // Zoom
-    rootEl.querySelector('#im-zoom').onchange = (e) => {
-      zoom = parseFloat(e.target.value);
+    const zoomSlider = rootEl.querySelector('#im-zoom');
+    const zoomLabel = rootEl.querySelector('#im-zoom-label');
+    zoomSlider.oninput = (e) => {
+      zoom = parseInt(e.target.value) / 100;
+      zoomLabel.textContent = e.target.value + '%';
       fitCanvasToContainer();
     };
 
