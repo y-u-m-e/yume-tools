@@ -480,6 +480,46 @@
       accent-color: #5eead4;
       cursor: pointer;
     }
+    
+    .im-slider {
+      flex: 1;
+      height: 6px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(94, 234, 212, 0.2);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    .im-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .im-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5eead4 0%, #2dd4bf 100%);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .im-slider-value {
+      min-width: 40px;
+      text-align: right;
+      font-size: 11px;
+      color: #5eead4;
+      font-family: monospace;
+    }
 
     .im-prop-input {
       flex: 1;
@@ -1557,8 +1597,11 @@
           <div class="im-prop-row" style="${layer.strokeEnabled ? '' : 'opacity:0.5;'}">
             <span class="im-prop-label">Color</span>
             <input type="color" class="im-color-input" data-prop="strokeColor" value="${layer.strokeColor || '#000000'}">
-            <span class="im-prop-label" style="width:auto;">Width</span>
-            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth || 2}" min="1" max="20" style="width:50px;">
+          </div>
+          <div class="im-prop-row" style="${layer.strokeEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Width</span>
+            <input type="range" class="im-slider" data-prop="strokeWidth" value="${layer.strokeWidth || 2}" min="1" max="20" step="1">
+            <span class="im-slider-value">${layer.strokeWidth || 2}px</span>
           </div>
         </div>
         <div class="im-prop-group">
@@ -1571,14 +1614,21 @@
           <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
             <span class="im-prop-label">Color</span>
             <input type="color" class="im-color-input" data-prop="shadowColor" value="${layer.shadowColor || '#000000'}">
-            <span class="im-prop-label" style="width:auto;">Blur</span>
-            <input type="number" class="im-prop-input" data-prop="shadowBlur" value="${layer.shadowBlur || 4}" min="0" max="50" style="width:50px;">
+          </div>
+          <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Blur</span>
+            <input type="range" class="im-slider" data-prop="shadowBlur" value="${layer.shadowBlur || 4}" min="0" max="30" step="1">
+            <span class="im-slider-value">${layer.shadowBlur || 4}px</span>
           </div>
           <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
             <span class="im-prop-label">Offset X</span>
-            <input type="number" class="im-prop-input" data-prop="shadowOffsetX" value="${layer.shadowOffsetX || 2}" style="width:50px;">
-            <span class="im-prop-label" style="width:auto;">Y</span>
-            <input type="number" class="im-prop-input" data-prop="shadowOffsetY" value="${layer.shadowOffsetY || 2}" style="width:50px;">
+            <input type="range" class="im-slider" data-prop="shadowOffsetX" value="${layer.shadowOffsetX || 2}" min="-20" max="20" step="1">
+            <span class="im-slider-value">${layer.shadowOffsetX || 2}px</span>
+          </div>
+          <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Offset Y</span>
+            <input type="range" class="im-slider" data-prop="shadowOffsetY" value="${layer.shadowOffsetY || 2}" min="-20" max="20" step="1">
+            <span class="im-slider-value">${layer.shadowOffsetY || 2}px</span>
           </div>
         </div>
       `;
@@ -1635,18 +1685,35 @@
         const prop = e.target.dataset.prop;
         let value = e.target.value;
         
+        // Handle checkbox
+        if (e.target.type === 'checkbox') {
+          value = e.target.checked;
+        }
         // Convert to number for numeric properties
-        if (['x', 'y', 'x2', 'y2', 'width', 'height', 'fontSize', 'strokeWidth', 'borderRadius', 'radius', 'opacity'].includes(prop)) {
+        else if (['x', 'y', 'x2', 'y2', 'width', 'height', 'fontSize', 'strokeWidth', 'borderRadius', 'radius', 'opacity', 'shadowBlur', 'shadowOffsetX', 'shadowOffsetY'].includes(prop)) {
           value = parseFloat(value);
         }
         
         layers[selectedLayerIdx][prop] = value;
         render();
         
+        // Update slider value label if this is a slider
+        if (e.target.type === 'range' && e.target.classList.contains('im-slider')) {
+          const valueLabel = e.target.nextElementSibling;
+          if (valueLabel && valueLabel.classList.contains('im-slider-value')) {
+            valueLabel.textContent = value + 'px';
+          }
+        }
+        
         // Update other inputs with same prop (color picker + text)
         if (e.target.type === 'color') {
           const textInput = container.querySelector(`input[type="text"][data-prop="${prop}"]`);
           if (textInput) textInput.value = value;
+        }
+        
+        // Re-render properties if checkbox changed (to update opacity of related rows)
+        if (e.target.type === 'checkbox') {
+          renderProperties(rootEl.closest('#infographic-maker') || rootEl);
         }
       });
     });
