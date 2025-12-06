@@ -1,0 +1,1453 @@
+/* infographic-maker.js — UMD build for Carrd embed
+ *
+ * OSRS-style infographic creator with:
+ * - Layer-based canvas editing
+ * - Image upload and positioning
+ * - Pre-built OSRS panels and shapes
+ * - RuneScape-style fonts
+ * - Export to PNG
+ *
+ * Exposes: `InfographicMaker.mount(selectorOrEl, options)`
+ */
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    module.exports = factory();
+  } else {
+    root.InfographicMaker = factory();
+  }
+})(this, function () {
+  const CSS_ID = 'infographic-maker-styles';
+
+  const STYLE = `
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+    
+    /* OSRS-style font */
+    @font-face {
+      font-family: 'RuneScape';
+      src: url('https://cdn.jsdelivr.net/gh/nicholasrobinson/runescape-font@master/runescape_uf.ttf') format('truetype');
+    }
+
+    #infographic-maker {
+      font-family: 'Outfit', sans-serif;
+      max-width: 1400px;
+      margin: 20px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      color: #eee;
+    }
+    #infographic-maker * { box-sizing: border-box; }
+    
+    #infographic-maker h2 {
+      margin: 0 0 20px 0;
+      color: #5eead4;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .im-container {
+      display: grid;
+      grid-template-columns: 280px 1fr 240px;
+      gap: 20px;
+      min-height: 600px;
+    }
+
+    /* Sidebar - Tools & Layers */
+    .im-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .im-panel {
+      background: rgba(15, 40, 50, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(94, 234, 212, 0.15);
+      overflow: hidden;
+    }
+
+    .im-panel-header {
+      padding: 12px 15px;
+      background: rgba(94, 234, 212, 0.1);
+      font-weight: 600;
+      font-size: 14px;
+      color: #5eead4;
+      border-bottom: 1px solid rgba(94, 234, 212, 0.1);
+    }
+
+    .im-panel-content {
+      padding: 12px;
+    }
+
+    /* Tool buttons */
+    .im-tools {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .im-tool-btn {
+      padding: 12px 8px;
+      background: rgba(94, 234, 212, 0.1);
+      border: 1px solid rgba(94, 234, 212, 0.2);
+      border-radius: 8px;
+      color: #eee;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-family: inherit;
+    }
+
+    .im-tool-btn:hover {
+      background: rgba(94, 234, 212, 0.2);
+      border-color: rgba(94, 234, 212, 0.4);
+    }
+
+    .im-tool-btn.active {
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+      border-color: transparent;
+    }
+
+    .im-tool-btn .icon {
+      font-size: 20px;
+    }
+
+    /* Preset shapes */
+    .im-presets {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .im-preset-btn {
+      padding: 10px;
+      background: rgba(30, 30, 30, 0.8);
+      border: 2px solid #3d3428;
+      border-radius: 4px;
+      color: #ff981f;
+      font-family: 'RuneScape', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .im-preset-btn:hover {
+      border-color: #ff981f;
+      transform: scale(1.02);
+    }
+
+    /* Layer list */
+    .im-layers {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .im-layer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: rgba(15, 40, 50, 0.5);
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .im-layer:hover {
+      background: rgba(94, 234, 212, 0.1);
+    }
+
+    .im-layer.selected {
+      border-color: #5eead4;
+      background: rgba(94, 234, 212, 0.15);
+    }
+
+    .im-layer-thumb {
+      width: 32px;
+      height: 32px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .im-layer-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .im-layer-name {
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .im-layer-type {
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+    }
+
+    .im-layer-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .im-layer-btn {
+      width: 24px;
+      height: 24px;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      border-radius: 4px;
+      color: #eee;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .im-layer-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .im-layer-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.5);
+    }
+
+    /* Canvas area */
+    .im-canvas-area {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .im-canvas-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(15, 40, 50, 0.6);
+      border-radius: 10px;
+      border: 1px solid rgba(94, 234, 212, 0.15);
+    }
+
+    .im-canvas-toolbar select,
+    .im-canvas-toolbar input {
+      padding: 8px 12px;
+      background: rgba(15, 40, 50, 0.8);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
+      color: #eee;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .im-canvas-toolbar label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .im-toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .im-toolbar-divider {
+      width: 1px;
+      height: 30px;
+      background: rgba(94, 234, 212, 0.2);
+      margin: 0 5px;
+    }
+
+    .im-canvas-wrap {
+      flex: 1;
+      background: repeating-conic-gradient(#1a1a1a 0% 25%, #222 0% 50%) 50% / 20px 20px;
+      border-radius: 10px;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-height: 500px;
+    }
+
+    .im-canvas-container {
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    #im-canvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    /* Properties panel */
+    .im-properties {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .im-prop-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .im-prop-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .im-prop-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      width: 60px;
+      flex-shrink: 0;
+    }
+
+    .im-prop-input {
+      flex: 1;
+      padding: 8px 10px;
+      background: rgba(15, 40, 50, 0.8);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
+      color: #eee;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .im-prop-input:focus {
+      outline: none;
+      border-color: #5eead4;
+    }
+
+    .im-color-input {
+      width: 40px;
+      height: 32px;
+      padding: 2px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .im-btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .im-btn-primary {
+      background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
+      color: #0f2935;
+    }
+
+    .im-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(94, 234, 212, 0.3);
+    }
+
+    .im-btn-secondary {
+      background: rgba(94, 234, 212, 0.15);
+      color: #5eead4;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+    }
+
+    .im-btn-secondary:hover {
+      background: rgba(94, 234, 212, 0.25);
+    }
+
+    .im-btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .im-btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    .im-btn-block {
+      width: 100%;
+    }
+
+    /* Text area for multiline */
+    .im-prop-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 10px;
+      background: rgba(15, 40, 50, 0.8);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
+      color: #eee;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    /* Upload area */
+    .im-upload-area {
+      border: 2px dashed rgba(94, 234, 212, 0.3);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .im-upload-area:hover {
+      border-color: #5eead4;
+      background: rgba(94, 234, 212, 0.05);
+    }
+
+    .im-upload-area .icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .im-upload-area p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin: 0;
+    }
+
+    /* Hidden file input */
+    .im-file-input {
+      display: none;
+    }
+
+    /* Selection handles would be drawn on canvas */
+    
+    /* Export buttons */
+    .im-export-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .im-container {
+        grid-template-columns: 1fr;
+      }
+      .im-sidebar, .im-properties {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .im-panel {
+        flex: 1;
+        min-width: 200px;
+      }
+    }
+  `;
+
+  const HTML = `
+    <div id="infographic-maker">
+      <h2>🎨 Infographic Maker</h2>
+      
+      <div class="im-container">
+        <!-- Left Sidebar - Tools & Layers -->
+        <div class="im-sidebar">
+          <div class="im-panel">
+            <div class="im-panel-header">🛠 Tools</div>
+            <div class="im-panel-content">
+              <div class="im-tools">
+                <button class="im-tool-btn active" data-tool="select">
+                  <span class="icon">⬚</span>
+                  Select
+                </button>
+                <button class="im-tool-btn" data-tool="text">
+                  <span class="icon">T</span>
+                  Text
+                </button>
+                <button class="im-tool-btn" data-tool="rect">
+                  <span class="icon">▢</span>
+                  Rectangle
+                </button>
+                <button class="im-tool-btn" data-tool="image">
+                  <span class="icon">🖼</span>
+                  Image
+                </button>
+                <button class="im-tool-btn" data-tool="line">
+                  <span class="icon">╱</span>
+                  Line
+                </button>
+                <button class="im-tool-btn" data-tool="circle">
+                  <span class="icon">○</span>
+                  Circle
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="im-panel">
+            <div class="im-panel-header">📦 OSRS Presets</div>
+            <div class="im-panel-content">
+              <div class="im-presets">
+                <button class="im-preset-btn" data-preset="osrs-panel">Dark Panel</button>
+                <button class="im-preset-btn" data-preset="osrs-inventory">Inventory</button>
+                <button class="im-preset-btn" data-preset="osrs-title">Title Box</button>
+                <button class="im-preset-btn" data-preset="osrs-bullet">Bullet List</button>
+                <button class="im-preset-btn" data-preset="osrs-border-cyan">Cyan Border</button>
+                <button class="im-preset-btn" data-preset="osrs-border-pink">Pink Border</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="im-panel" style="flex:1;">
+            <div class="im-panel-header">📚 Layers</div>
+            <div class="im-panel-content">
+              <div class="im-layers" id="im-layers">
+                <div class="im-layer selected">
+                  <div class="im-layer-thumb">🖼</div>
+                  <div class="im-layer-info">
+                    <div class="im-layer-name">Background</div>
+                    <div class="im-layer-type">Layer</div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:10px; display:flex; gap:6px;">
+                <button class="im-btn im-btn-secondary" style="flex:1; font-size:11px;" id="im-layer-up">↑ Up</button>
+                <button class="im-btn im-btn-secondary" style="flex:1; font-size:11px;" id="im-layer-down">↓ Down</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center - Canvas -->
+        <div class="im-canvas-area">
+          <div class="im-canvas-toolbar">
+            <div class="im-toolbar-group">
+              <label>Size:</label>
+              <select id="im-canvas-size">
+                <option value="1280x720">1280 × 720 (HD)</option>
+                <option value="1920x1080">1920 × 1080 (Full HD)</option>
+                <option value="800x600">800 × 600</option>
+                <option value="600x400">600 × 400 (Discord)</option>
+                <option value="custom">Custom...</option>
+              </select>
+            </div>
+            <div class="im-toolbar-divider"></div>
+            <div class="im-toolbar-group">
+              <label>Zoom:</label>
+              <select id="im-zoom">
+                <option value="0.5">50%</option>
+                <option value="0.75">75%</option>
+                <option value="1" selected>100%</option>
+                <option value="1.5">150%</option>
+                <option value="2">200%</option>
+              </select>
+            </div>
+            <div class="im-toolbar-divider"></div>
+            <div class="im-toolbar-group">
+              <label>BG:</label>
+              <input type="color" id="im-bg-color" value="#3d5c3d" class="im-color-input">
+            </div>
+            <div style="flex:1;"></div>
+            <div class="im-export-btns">
+              <button class="im-btn im-btn-secondary" id="im-clear-btn">🗑 Clear</button>
+              <button class="im-btn im-btn-primary" id="im-export-btn">📥 Export PNG</button>
+            </div>
+          </div>
+          <div class="im-canvas-wrap">
+            <div class="im-canvas-container">
+              <canvas id="im-canvas" width="1280" height="720"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right - Properties -->
+        <div class="im-properties">
+          <div class="im-panel">
+            <div class="im-panel-header">⬆ Upload Image</div>
+            <div class="im-panel-content">
+              <div class="im-upload-area" id="im-upload-area">
+                <div class="icon">📁</div>
+                <p>Click or drag image here</p>
+              </div>
+              <input type="file" accept="image/*" class="im-file-input" id="im-file-input" multiple>
+            </div>
+          </div>
+
+          <div class="im-panel" id="im-props-panel" style="flex:1;">
+            <div class="im-panel-header">⚙ Properties</div>
+            <div class="im-panel-content" id="im-props-content">
+              <p style="color:rgba(255,255,255,0.4); font-size:12px; text-align:center;">
+                Select an element to edit its properties
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function injectStyles(doc) {
+    if (doc.getElementById(CSS_ID)) return;
+    const style = doc.createElement('style');
+    style.id = CSS_ID;
+    style.textContent = STYLE;
+    doc.head.appendChild(style);
+  }
+
+  // Canvas state
+  let canvas, ctx;
+  let layers = [];
+  let selectedLayerIdx = -1;
+  let currentTool = 'select';
+  let isDragging = false;
+  let isResizing = false;
+  let dragStart = { x: 0, y: 0 };
+  let dragOffset = { x: 0, y: 0 };
+  let zoom = 1;
+  let bgColor = '#3d5c3d';
+
+  // Layer types
+  const LAYER_TYPES = {
+    RECT: 'rect',
+    TEXT: 'text',
+    IMAGE: 'image',
+    LINE: 'line',
+    CIRCLE: 'circle'
+  };
+
+  // OSRS Colors
+  const OSRS_COLORS = {
+    orange: '#ff981f',
+    yellow: '#ffff00',
+    cyan: '#00ffff',
+    green: '#00ff00',
+    pink: '#ff00ff',
+    white: '#ffffff',
+    dark: '#3d3428',
+    panel: 'rgba(30, 30, 30, 0.9)'
+  };
+
+  function createLayer(type, props = {}) {
+    const base = {
+      id: Date.now() + Math.random(),
+      type,
+      x: props.x || 100,
+      y: props.y || 100,
+      width: props.width || 200,
+      height: props.height || 100,
+      rotation: 0,
+      opacity: 1,
+      visible: true,
+      locked: false,
+      name: props.name || `${type} ${layers.length + 1}`
+    };
+
+    switch (type) {
+      case LAYER_TYPES.RECT:
+        return {
+          ...base,
+          fill: props.fill || OSRS_COLORS.panel,
+          stroke: props.stroke || OSRS_COLORS.dark,
+          strokeWidth: props.strokeWidth || 3,
+          borderRadius: props.borderRadius || 0
+        };
+      case LAYER_TYPES.TEXT:
+        return {
+          ...base,
+          text: props.text || 'Text',
+          fontSize: props.fontSize || 24,
+          fontFamily: props.fontFamily || 'RuneScape',
+          fill: props.fill || OSRS_COLORS.orange,
+          align: props.align || 'left',
+          width: props.width || 300,
+          height: props.height || 40
+        };
+      case LAYER_TYPES.IMAGE:
+        return {
+          ...base,
+          src: props.src || '',
+          image: props.image || null,
+          width: props.width || 200,
+          height: props.height || 200
+        };
+      case LAYER_TYPES.LINE:
+        return {
+          ...base,
+          x2: props.x2 || base.x + 100,
+          y2: props.y2 || base.y,
+          stroke: props.stroke || OSRS_COLORS.cyan,
+          strokeWidth: props.strokeWidth || 2
+        };
+      case LAYER_TYPES.CIRCLE:
+        return {
+          ...base,
+          radius: props.radius || 50,
+          fill: props.fill || 'transparent',
+          stroke: props.stroke || OSRS_COLORS.cyan,
+          strokeWidth: props.strokeWidth || 3
+        };
+      default:
+        return base;
+    }
+  }
+
+  function drawLayer(layer) {
+    if (!layer.visible) return;
+
+    ctx.save();
+    ctx.globalAlpha = layer.opacity;
+
+    switch (layer.type) {
+      case LAYER_TYPES.RECT:
+        ctx.fillStyle = layer.fill;
+        ctx.strokeStyle = layer.stroke;
+        ctx.lineWidth = layer.strokeWidth;
+        
+        if (layer.borderRadius > 0) {
+          roundRect(ctx, layer.x, layer.y, layer.width, layer.height, layer.borderRadius);
+          if (layer.fill && layer.fill !== 'transparent') ctx.fill();
+          if (layer.strokeWidth > 0) ctx.stroke();
+        } else {
+          if (layer.fill && layer.fill !== 'transparent') {
+            ctx.fillRect(layer.x, layer.y, layer.width, layer.height);
+          }
+          if (layer.strokeWidth > 0) {
+            ctx.strokeRect(layer.x, layer.y, layer.width, layer.height);
+          }
+        }
+        break;
+
+      case LAYER_TYPES.TEXT:
+        ctx.font = `${layer.fontSize}px ${layer.fontFamily}`;
+        ctx.fillStyle = layer.fill;
+        ctx.textAlign = layer.align;
+        ctx.textBaseline = 'top';
+        
+        const lines = layer.text.split('\n');
+        const lineHeight = layer.fontSize * 1.2;
+        let textX = layer.x;
+        if (layer.align === 'center') textX = layer.x + layer.width / 2;
+        else if (layer.align === 'right') textX = layer.x + layer.width;
+        
+        lines.forEach((line, i) => {
+          ctx.fillText(line, textX, layer.y + i * lineHeight);
+        });
+        break;
+
+      case LAYER_TYPES.IMAGE:
+        if (layer.image) {
+          ctx.drawImage(layer.image, layer.x, layer.y, layer.width, layer.height);
+        }
+        break;
+
+      case LAYER_TYPES.LINE:
+        ctx.strokeStyle = layer.stroke;
+        ctx.lineWidth = layer.strokeWidth;
+        ctx.beginPath();
+        ctx.moveTo(layer.x, layer.y);
+        ctx.lineTo(layer.x2, layer.y2);
+        ctx.stroke();
+        break;
+
+      case LAYER_TYPES.CIRCLE:
+        ctx.fillStyle = layer.fill;
+        ctx.strokeStyle = layer.stroke;
+        ctx.lineWidth = layer.strokeWidth;
+        ctx.beginPath();
+        ctx.arc(layer.x + layer.radius, layer.y + layer.radius, layer.radius, 0, Math.PI * 2);
+        if (layer.fill && layer.fill !== 'transparent') ctx.fill();
+        if (layer.strokeWidth > 0) ctx.stroke();
+        break;
+    }
+
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawSelectionHandles(layer) {
+    if (!layer) return;
+
+    ctx.save();
+    ctx.strokeStyle = '#5eead4';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+
+    const bounds = getLayerBounds(layer);
+    ctx.strokeRect(bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4);
+
+    // Draw resize handles
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#5eead4';
+    const handleSize = 8;
+    const handles = [
+      { x: bounds.x - handleSize/2, y: bounds.y - handleSize/2 },
+      { x: bounds.x + bounds.width/2 - handleSize/2, y: bounds.y - handleSize/2 },
+      { x: bounds.x + bounds.width - handleSize/2, y: bounds.y - handleSize/2 },
+      { x: bounds.x + bounds.width - handleSize/2, y: bounds.y + bounds.height/2 - handleSize/2 },
+      { x: bounds.x + bounds.width - handleSize/2, y: bounds.y + bounds.height - handleSize/2 },
+      { x: bounds.x + bounds.width/2 - handleSize/2, y: bounds.y + bounds.height - handleSize/2 },
+      { x: bounds.x - handleSize/2, y: bounds.y + bounds.height - handleSize/2 },
+      { x: bounds.x - handleSize/2, y: bounds.y + bounds.height/2 - handleSize/2 }
+    ];
+
+    handles.forEach(h => {
+      ctx.fillRect(h.x, h.y, handleSize, handleSize);
+    });
+
+    ctx.restore();
+  }
+
+  function getLayerBounds(layer) {
+    if (layer.type === LAYER_TYPES.LINE) {
+      const minX = Math.min(layer.x, layer.x2);
+      const maxX = Math.max(layer.x, layer.x2);
+      const minY = Math.min(layer.y, layer.y2);
+      const maxY = Math.max(layer.y, layer.y2);
+      return { x: minX, y: minY, width: maxX - minX || 10, height: maxY - minY || 10 };
+    }
+    if (layer.type === LAYER_TYPES.CIRCLE) {
+      return { x: layer.x, y: layer.y, width: layer.radius * 2, height: layer.radius * 2 };
+    }
+    return { x: layer.x, y: layer.y, width: layer.width, height: layer.height };
+  }
+
+  function hitTest(layer, x, y) {
+    const bounds = getLayerBounds(layer);
+    return x >= bounds.x && x <= bounds.x + bounds.width &&
+           y >= bounds.y && y <= bounds.y + bounds.height;
+  }
+
+  function render() {
+    // Clear canvas
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw all layers
+    layers.forEach(layer => drawLayer(layer));
+
+    // Draw selection
+    if (selectedLayerIdx >= 0 && selectedLayerIdx < layers.length) {
+      drawSelectionHandles(layers[selectedLayerIdx]);
+    }
+  }
+
+  function renderLayersList(rootEl) {
+    const container = rootEl.querySelector('#im-layers');
+    container.innerHTML = layers.map((layer, idx) => `
+      <div class="im-layer ${idx === selectedLayerIdx ? 'selected' : ''}" data-idx="${idx}">
+        <div class="im-layer-thumb">${getLayerIcon(layer.type)}</div>
+        <div class="im-layer-info">
+          <div class="im-layer-name">${escapeHtml(layer.name)}</div>
+          <div class="im-layer-type">${layer.type}</div>
+        </div>
+        <div class="im-layer-actions">
+          <button class="im-layer-btn" data-action="visible" title="${layer.visible ? 'Hide' : 'Show'}">
+            ${layer.visible ? '👁' : '👁‍🗨'}
+          </button>
+          <button class="im-layer-btn delete" data-action="delete" title="Delete">🗑</button>
+        </div>
+      </div>
+    `).reverse().join('');
+  }
+
+  function getLayerIcon(type) {
+    switch (type) {
+      case LAYER_TYPES.RECT: return '▢';
+      case LAYER_TYPES.TEXT: return 'T';
+      case LAYER_TYPES.IMAGE: return '🖼';
+      case LAYER_TYPES.LINE: return '╱';
+      case LAYER_TYPES.CIRCLE: return '○';
+      default: return '?';
+    }
+  }
+
+  function renderProperties(rootEl) {
+    const container = rootEl.querySelector('#im-props-content');
+    
+    if (selectedLayerIdx < 0 || selectedLayerIdx >= layers.length) {
+      container.innerHTML = `<p style="color:rgba(255,255,255,0.4); font-size:12px; text-align:center;">
+        Select an element to edit its properties
+      </p>`;
+      return;
+    }
+
+    const layer = layers[selectedLayerIdx];
+    let html = `
+      <div class="im-prop-group">
+        <div class="im-prop-row">
+          <span class="im-prop-label">Name</span>
+          <input type="text" class="im-prop-input" data-prop="name" value="${escapeHtml(layer.name)}">
+        </div>
+        <div class="im-prop-row">
+          <span class="im-prop-label">X</span>
+          <input type="number" class="im-prop-input" data-prop="x" value="${Math.round(layer.x)}" style="width:70px;">
+          <span class="im-prop-label" style="width:20px;">Y</span>
+          <input type="number" class="im-prop-input" data-prop="y" value="${Math.round(layer.y)}" style="width:70px;">
+        </div>
+    `;
+
+    if (layer.type !== LAYER_TYPES.LINE) {
+      html += `
+        <div class="im-prop-row">
+          <span class="im-prop-label">Width</span>
+          <input type="number" class="im-prop-input" data-prop="width" value="${Math.round(layer.width)}" style="width:70px;">
+          <span class="im-prop-label" style="width:20px;">H</span>
+          <input type="number" class="im-prop-input" data-prop="height" value="${Math.round(layer.height)}" style="width:70px;">
+        </div>
+      `;
+    }
+
+    html += `
+        <div class="im-prop-row">
+          <span class="im-prop-label">Opacity</span>
+          <input type="range" min="0" max="1" step="0.1" data-prop="opacity" value="${layer.opacity}" style="flex:1;">
+        </div>
+      </div>
+    `;
+
+    // Type-specific properties
+    if (layer.type === LAYER_TYPES.RECT) {
+      html += `
+        <div class="im-prop-group">
+          <div class="im-prop-row">
+            <span class="im-prop-label">Fill</span>
+            <input type="color" class="im-color-input" data-prop="fill" value="${layer.fill || '#000000'}">
+            <input type="text" class="im-prop-input" data-prop="fill" value="${layer.fill}" style="flex:1;">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Stroke</span>
+            <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#000000'}">
+            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;" placeholder="Width">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Radius</span>
+            <input type="number" class="im-prop-input" data-prop="borderRadius" value="${layer.borderRadius || 0}">
+          </div>
+        </div>
+      `;
+    }
+
+    if (layer.type === LAYER_TYPES.TEXT) {
+      html += `
+        <div class="im-prop-group">
+          <textarea class="im-prop-textarea" data-prop="text" placeholder="Enter text...">${escapeHtml(layer.text)}</textarea>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Font</span>
+            <select class="im-prop-input" data-prop="fontFamily">
+              <option value="RuneScape" ${layer.fontFamily === 'RuneScape' ? 'selected' : ''}>RuneScape</option>
+              <option value="Outfit" ${layer.fontFamily === 'Outfit' ? 'selected' : ''}>Outfit</option>
+              <option value="Arial" ${layer.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
+              <option value="Impact" ${layer.fontFamily === 'Impact' ? 'selected' : ''}>Impact</option>
+            </select>
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Size</span>
+            <input type="number" class="im-prop-input" data-prop="fontSize" value="${layer.fontSize}" style="width:60px;">
+            <span class="im-prop-label" style="width:auto;">Color</span>
+            <input type="color" class="im-color-input" data-prop="fill" value="${layer.fill || '#ffffff'}">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Align</span>
+            <select class="im-prop-input" data-prop="align">
+              <option value="left" ${layer.align === 'left' ? 'selected' : ''}>Left</option>
+              <option value="center" ${layer.align === 'center' ? 'selected' : ''}>Center</option>
+              <option value="right" ${layer.align === 'right' ? 'selected' : ''}>Right</option>
+            </select>
+          </div>
+        </div>
+      `;
+    }
+
+    if (layer.type === LAYER_TYPES.CIRCLE) {
+      html += `
+        <div class="im-prop-group">
+          <div class="im-prop-row">
+            <span class="im-prop-label">Radius</span>
+            <input type="number" class="im-prop-input" data-prop="radius" value="${layer.radius}">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Fill</span>
+            <input type="color" class="im-color-input" data-prop="fill" value="${layer.fill || '#000000'}">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Stroke</span>
+            <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#00ffff'}">
+            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;">
+          </div>
+        </div>
+      `;
+    }
+
+    if (layer.type === LAYER_TYPES.LINE) {
+      html += `
+        <div class="im-prop-group">
+          <div class="im-prop-row">
+            <span class="im-prop-label">End X</span>
+            <input type="number" class="im-prop-input" data-prop="x2" value="${Math.round(layer.x2)}" style="width:70px;">
+            <span class="im-prop-label" style="width:40px;">End Y</span>
+            <input type="number" class="im-prop-input" data-prop="y2" value="${Math.round(layer.y2)}" style="width:70px;">
+          </div>
+          <div class="im-prop-row">
+            <span class="im-prop-label">Color</span>
+            <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#00ffff'}">
+            <span class="im-prop-label" style="width:40px;">Width</span>
+            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;">
+          </div>
+        </div>
+      `;
+    }
+
+    html += `
+      <button class="im-btn im-btn-danger im-btn-block" id="im-delete-layer">🗑 Delete Layer</button>
+    `;
+
+    container.innerHTML = html;
+
+    // Wire up property changes
+    container.querySelectorAll('[data-prop]').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const prop = e.target.dataset.prop;
+        let value = e.target.value;
+        
+        // Convert to number for numeric properties
+        if (['x', 'y', 'x2', 'y2', 'width', 'height', 'fontSize', 'strokeWidth', 'borderRadius', 'radius', 'opacity'].includes(prop)) {
+          value = parseFloat(value);
+        }
+        
+        layers[selectedLayerIdx][prop] = value;
+        render();
+        
+        // Update other inputs with same prop (color picker + text)
+        if (e.target.type === 'color') {
+          const textInput = container.querySelector(`input[type="text"][data-prop="${prop}"]`);
+          if (textInput) textInput.value = value;
+        }
+      });
+    });
+
+    // Delete button
+    const deleteBtn = container.querySelector('#im-delete-layer');
+    if (deleteBtn) {
+      deleteBtn.onclick = () => {
+        layers.splice(selectedLayerIdx, 1);
+        selectedLayerIdx = -1;
+        render();
+        renderLayersList(rootEl.closest('#infographic-maker'));
+        renderProperties(rootEl.closest('#infographic-maker'));
+      };
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  function addPreset(preset, rootEl) {
+    let layer;
+    switch (preset) {
+      case 'osrs-panel':
+        layer = createLayer(LAYER_TYPES.RECT, {
+          name: 'OSRS Panel',
+          width: 400,
+          height: 200,
+          fill: 'rgba(30, 30, 30, 0.9)',
+          stroke: '#3d3428',
+          strokeWidth: 3,
+          borderRadius: 0
+        });
+        break;
+      case 'osrs-inventory':
+        layer = createLayer(LAYER_TYPES.RECT, {
+          name: 'Inventory Slot',
+          width: 250,
+          height: 300,
+          fill: 'rgba(60, 50, 40, 0.8)',
+          stroke: '#3d3428',
+          strokeWidth: 3
+        });
+        break;
+      case 'osrs-title':
+        layer = createLayer(LAYER_TYPES.TEXT, {
+          name: 'Title',
+          text: 'Title Here',
+          fontSize: 36,
+          fontFamily: 'RuneScape',
+          fill: '#ff981f',
+          width: 300
+        });
+        break;
+      case 'osrs-bullet':
+        layer = createLayer(LAYER_TYPES.TEXT, {
+          name: 'Bullet List',
+          text: '■ Item one\n■ Item two\n■ Item three',
+          fontSize: 20,
+          fontFamily: 'RuneScape',
+          fill: '#00ffff',
+          width: 350,
+          height: 100
+        });
+        break;
+      case 'osrs-border-cyan':
+        layer = createLayer(LAYER_TYPES.RECT, {
+          name: 'Cyan Border',
+          width: 100,
+          height: 100,
+          fill: 'transparent',
+          stroke: '#00ffff',
+          strokeWidth: 3
+        });
+        break;
+      case 'osrs-border-pink':
+        layer = createLayer(LAYER_TYPES.RECT, {
+          name: 'Pink Border',
+          width: 100,
+          height: 100,
+          fill: 'transparent',
+          stroke: '#ff00ff',
+          strokeWidth: 3
+        });
+        break;
+    }
+
+    if (layer) {
+      layers.push(layer);
+      selectedLayerIdx = layers.length - 1;
+      render();
+      renderLayersList(rootEl);
+      renderProperties(rootEl);
+    }
+  }
+
+  function wire(rootEl) {
+    canvas = rootEl.querySelector('#im-canvas');
+    ctx = canvas.getContext('2d');
+
+    // Initial render
+    render();
+    renderLayersList(rootEl);
+
+    // Tool selection
+    rootEl.querySelectorAll('.im-tool-btn').forEach(btn => {
+      btn.onclick = () => {
+        rootEl.querySelectorAll('.im-tool-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool = btn.dataset.tool;
+      };
+    });
+
+    // Preset buttons
+    rootEl.querySelectorAll('.im-preset-btn').forEach(btn => {
+      btn.onclick = () => addPreset(btn.dataset.preset, rootEl);
+    });
+
+    // Canvas size
+    rootEl.querySelector('#im-canvas-size').onchange = (e) => {
+      const [w, h] = e.target.value.split('x').map(Number);
+      if (w && h) {
+        canvas.width = w;
+        canvas.height = h;
+        render();
+      }
+    };
+
+    // Zoom
+    rootEl.querySelector('#im-zoom').onchange = (e) => {
+      zoom = parseFloat(e.target.value);
+      canvas.style.transform = `scale(${zoom})`;
+      canvas.style.transformOrigin = 'top left';
+    };
+
+    // Background color
+    rootEl.querySelector('#im-bg-color').oninput = (e) => {
+      bgColor = e.target.value;
+      render();
+    };
+
+    // Canvas mouse events
+    let startLayer = null;
+
+    canvas.onmousedown = (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+
+      if (currentTool === 'select') {
+        // Find clicked layer (top to bottom)
+        selectedLayerIdx = -1;
+        for (let i = layers.length - 1; i >= 0; i--) {
+          if (hitTest(layers[i], x, y)) {
+            selectedLayerIdx = i;
+            isDragging = true;
+            dragStart = { x, y };
+            dragOffset = { x: x - layers[i].x, y: y - layers[i].y };
+            break;
+          }
+        }
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+      } else if (currentTool === 'rect') {
+        startLayer = createLayer(LAYER_TYPES.RECT, { x, y, width: 0, height: 0 });
+        layers.push(startLayer);
+        selectedLayerIdx = layers.length - 1;
+        isDragging = true;
+        dragStart = { x, y };
+      } else if (currentTool === 'text') {
+        const layer = createLayer(LAYER_TYPES.TEXT, { x, y });
+        layers.push(layer);
+        selectedLayerIdx = layers.length - 1;
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+      } else if (currentTool === 'circle') {
+        startLayer = createLayer(LAYER_TYPES.CIRCLE, { x, y, radius: 0 });
+        layers.push(startLayer);
+        selectedLayerIdx = layers.length - 1;
+        isDragging = true;
+        dragStart = { x, y };
+      } else if (currentTool === 'line') {
+        startLayer = createLayer(LAYER_TYPES.LINE, { x, y, x2: x, y2: y });
+        layers.push(startLayer);
+        selectedLayerIdx = layers.length - 1;
+        isDragging = true;
+        dragStart = { x, y };
+      }
+    };
+
+    canvas.onmousemove = (e) => {
+      if (!isDragging) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / zoom;
+      const y = (e.clientY - rect.top) / zoom;
+
+      if (currentTool === 'select' && selectedLayerIdx >= 0) {
+        const layer = layers[selectedLayerIdx];
+        layer.x = x - dragOffset.x;
+        layer.y = y - dragOffset.y;
+      } else if (currentTool === 'rect' && startLayer) {
+        startLayer.width = x - dragStart.x;
+        startLayer.height = y - dragStart.y;
+      } else if (currentTool === 'circle' && startLayer) {
+        const dx = x - dragStart.x;
+        const dy = y - dragStart.y;
+        startLayer.radius = Math.sqrt(dx * dx + dy * dy);
+      } else if (currentTool === 'line' && startLayer) {
+        startLayer.x2 = x;
+        startLayer.y2 = y;
+      }
+
+      render();
+    };
+
+    canvas.onmouseup = () => {
+      isDragging = false;
+      startLayer = null;
+      renderLayersList(rootEl);
+      renderProperties(rootEl);
+    };
+
+    canvas.onmouseleave = () => {
+      isDragging = false;
+      startLayer = null;
+    };
+
+    // Layer list clicks
+    rootEl.querySelector('#im-layers').onclick = (e) => {
+      const layerEl = e.target.closest('.im-layer');
+      if (!layerEl) return;
+
+      const idx = parseInt(layerEl.dataset.idx);
+      const action = e.target.closest('[data-action]')?.dataset.action;
+
+      if (action === 'delete') {
+        layers.splice(idx, 1);
+        selectedLayerIdx = -1;
+      } else if (action === 'visible') {
+        layers[idx].visible = !layers[idx].visible;
+      } else {
+        selectedLayerIdx = idx;
+      }
+
+      render();
+      renderLayersList(rootEl);
+      renderProperties(rootEl);
+    };
+
+    // Layer up/down
+    rootEl.querySelector('#im-layer-up').onclick = () => {
+      if (selectedLayerIdx < layers.length - 1) {
+        [layers[selectedLayerIdx], layers[selectedLayerIdx + 1]] = [layers[selectedLayerIdx + 1], layers[selectedLayerIdx]];
+        selectedLayerIdx++;
+        render();
+        renderLayersList(rootEl);
+      }
+    };
+
+    rootEl.querySelector('#im-layer-down').onclick = () => {
+      if (selectedLayerIdx > 0) {
+        [layers[selectedLayerIdx], layers[selectedLayerIdx - 1]] = [layers[selectedLayerIdx - 1], layers[selectedLayerIdx]];
+        selectedLayerIdx--;
+        render();
+        renderLayersList(rootEl);
+      }
+    };
+
+    // Image upload
+    const uploadArea = rootEl.querySelector('#im-upload-area');
+    const fileInput = rootEl.querySelector('#im-file-input');
+
+    uploadArea.onclick = () => fileInput.click();
+    
+    uploadArea.ondragover = (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '#5eead4';
+    };
+
+    uploadArea.ondragleave = () => {
+      uploadArea.style.borderColor = '';
+    };
+
+    uploadArea.ondrop = (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      handleFiles(e.dataTransfer.files);
+    };
+
+    fileInput.onchange = (e) => handleFiles(e.target.files);
+
+    async function handleFiles(files) {
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            const img = await loadImage(e.target.result);
+            const layer = createLayer(LAYER_TYPES.IMAGE, {
+              name: file.name,
+              image: img,
+              src: e.target.result,
+              width: Math.min(img.width, canvas.width / 2),
+              height: Math.min(img.height, canvas.height / 2) * (Math.min(img.width, canvas.width / 2) / img.width)
+            });
+            layers.push(layer);
+            selectedLayerIdx = layers.length - 1;
+            render();
+            renderLayersList(rootEl);
+            renderProperties(rootEl);
+          } catch (err) {
+            console.error('Failed to load image:', err);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Clear
+    rootEl.querySelector('#im-clear-btn').onclick = () => {
+      if (confirm('Clear all layers?')) {
+        layers = [];
+        selectedLayerIdx = -1;
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+      }
+    };
+
+    // Export
+    rootEl.querySelector('#im-export-btn').onclick = () => {
+      // Deselect to hide selection handles
+      const prevSelected = selectedLayerIdx;
+      selectedLayerIdx = -1;
+      render();
+
+      // Export
+      const link = document.createElement('a');
+      link.download = 'infographic.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      // Restore selection
+      selectedLayerIdx = prevSelected;
+      render();
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedLayerIdx >= 0) {
+          layers.splice(selectedLayerIdx, 1);
+          selectedLayerIdx = -1;
+          render();
+          renderLayersList(rootEl);
+          renderProperties(rootEl);
+        }
+      }
+
+      if (e.key === 'Escape') {
+        selectedLayerIdx = -1;
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+      }
+    });
+  }
+
+  function mount(selectorOrEl, options = {}) {
+    const host = (typeof selectorOrEl === 'string') ? document.querySelector(selectorOrEl) : selectorOrEl;
+    if (!host) return;
+
+    injectStyles(document);
+    host.innerHTML = HTML;
+    wire(host.querySelector('#infographic-maker'));
+  }
+
+  return { mount };
+});
+
