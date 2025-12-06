@@ -1428,7 +1428,12 @@
   const UNAUTHORIZED_HTML = (username, avatar) => `
     <div id="cruddy-panel" class="cp-unauthorized">
       <div class="cp-auth-screen">
-        <div class="cp-auth-icon">🚫</div>
+        <div class="cp-auth-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+          </svg>
+        </div>
         <div class="cp-auth-title">Access Denied</div>
         <p class="cp-auth-message">
           Sorry <strong>${username}</strong>, you are not authorized to access this page.<br>
