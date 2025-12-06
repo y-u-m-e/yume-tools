@@ -261,6 +261,19 @@
     .im-layer-btn.delete:hover {
       background: rgba(239, 68, 68, 0.5);
     }
+    
+    .im-layer-btn.active {
+      background: rgba(94, 234, 212, 0.3);
+      color: #5eead4;
+    }
+    
+    .im-layer.locked {
+      opacity: 0.7;
+    }
+    
+    .im-layer.locked .im-layer-thumb {
+      background: rgba(94, 234, 212, 0.2);
+    }
 
     /* Canvas area */
     .im-canvas-area {
@@ -1409,13 +1422,16 @@
   function renderLayersList(rootEl) {
     const container = rootEl.querySelector('#im-layers');
     container.innerHTML = layers.map((layer, idx) => `
-      <div class="im-layer ${idx === selectedLayerIdx ? 'selected' : ''}" data-idx="${idx}">
+      <div class="im-layer ${idx === selectedLayerIdx ? 'selected' : ''} ${layer.locked ? 'locked' : ''}" data-idx="${idx}">
         <div class="im-layer-thumb">${getLayerIcon(layer.type)}</div>
         <div class="im-layer-info">
           <div class="im-layer-name">${escapeHtml(layer.name)}</div>
           <div class="im-layer-type">${layer.type}</div>
         </div>
         <div class="im-layer-actions">
+          <button class="im-layer-btn ${layer.locked ? 'active' : ''}" data-action="lock" title="${layer.locked ? 'Unlock' : 'Lock'}">
+            ${layer.locked ? '🔒' : '🔓'}
+          </button>
           <button class="im-layer-btn" data-action="visible" title="${layer.visible ? 'Hide' : 'Show'}">
             ${layer.visible ? '👁' : '👁‍🗨'}
           </button>
@@ -1917,8 +1933,8 @@
       const { x, y } = getCanvasCoords(e);
 
       if (currentTool === 'select') {
-        // Check for resize handle first
-        if (selectedLayerIdx >= 0) {
+        // Check for resize handle first (only if layer not locked)
+        if (selectedLayerIdx >= 0 && !layers[selectedLayerIdx].locked) {
           const handle = getResizeHandle(x, y, layers[selectedLayerIdx]);
           if (handle) {
             resizeHandle = handle;
@@ -1934,9 +1950,12 @@
         for (let i = layers.length - 1; i >= 0; i--) {
           if (hitTest(layers[i], x, y)) {
             selectedLayerIdx = i;
-            isDragging = true;
-            dragStart = { x, y };
-            dragOffset = { x: x - layers[i].x, y: y - layers[i].y };
+            // Only allow dragging if layer is not locked
+            if (!layers[i].locked) {
+              isDragging = true;
+              dragStart = { x, y };
+              dragOffset = { x: x - layers[i].x, y: y - layers[i].y };
+            }
             break;
           }
         }
@@ -2053,6 +2072,8 @@
         selectedLayerIdx = -1;
       } else if (action === 'visible') {
         layers[idx].visible = !layers[idx].visible;
+      } else if (action === 'lock') {
+        layers[idx].locked = !layers[idx].locked;
       } else {
         selectedLayerIdx = idx;
       }
