@@ -31,10 +31,12 @@
 
     #infographic-maker {
       font-family: 'Outfit', sans-serif;
-      width: 100%;
-      max-width: 100%;
-      margin: 0 auto;
+      width: calc(100vw - 60px);
+      max-width: 1800px;
+      height: calc(100vh - 120px);
+      margin: 20px auto;
       padding: 20px;
+      overflow: hidden;
       background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
       backdrop-filter: blur(12px);
       border-radius: 16px;
@@ -55,14 +57,17 @@
       display: grid;
       grid-template-columns: 260px minmax(0, 1fr) 220px;
       gap: 15px;
-      min-height: 500px;
+      height: calc(100% - 60px);
+      min-height: 400px;
     }
 
     /* Sidebar - Tools & Layers */
     .im-sidebar {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
+      height: 100%;
+      overflow-y: auto;
     }
 
     .im-panel {
@@ -237,7 +242,9 @@
     .im-canvas-area {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 10px;
+      height: 100%;
+      overflow: hidden;
     }
 
     .im-canvas-toolbar {
@@ -288,7 +295,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 400px;
+      min-height: 300px;
+      height: 100%;
     }
 
     .im-canvas-container {
@@ -307,7 +315,9 @@
     .im-properties {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
+      height: 100%;
+      overflow-y: auto;
     }
 
     .im-prop-group {
