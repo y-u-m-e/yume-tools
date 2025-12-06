@@ -29,6 +29,23 @@
       src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
     }
 
+    /* Override Carrd container constraints */
+    #infographic-root,
+    #infographic-root > *,
+    [id*="infographic"] {
+      max-width: none !important;
+      width: 100% !important;
+    }
+    
+    /* Force parent containers to expand */
+    #infographic-root {
+      position: relative !important;
+      width: calc(100vw - 60px) !important;
+      max-width: 1600px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+    }
+
     #infographic-maker {
       font-family: 'Outfit', sans-serif;
       width: 100%;
