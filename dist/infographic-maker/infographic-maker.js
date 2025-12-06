@@ -23,10 +23,16 @@
   const STYLE = `
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
     
-    /* OSRS-style font */
+    /* OSRS-style font - using web-safe fallback */
     @font-face {
       font-family: 'RuneScape';
       src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
+      font-display: swap;
+    }
+    
+    /* Fallback if font fails */
+    .runescape-font {
+      font-family: 'RuneScape', 'Trebuchet MS', 'Arial Black', sans-serif;
     }
 
     /* Override Carrd container constraints */
@@ -334,35 +340,53 @@
       gap: 12px;
       height: 100%;
       overflow-y: auto;
+      min-width: 200px;
+    }
+
+    #im-props-panel {
+      max-height: 100%;
+      overflow: hidden;
+    }
+
+    #im-props-content {
+      max-height: calc(100vh - 400px);
+      overflow-y: auto;
+      padding-right: 5px;
     }
 
     .im-prop-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      padding: 10px;
+      background: rgba(15, 40, 50, 0.4);
+      border-radius: 8px;
+      margin-bottom: 8px;
     }
 
     .im-prop-row {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .im-prop-label {
-      font-size: 12px;
+      font-size: 11px;
       color: rgba(255,255,255,0.6);
-      width: 60px;
+      width: 50px;
       flex-shrink: 0;
     }
 
     .im-prop-input {
       flex: 1;
-      padding: 8px 10px;
+      min-width: 60px;
+      padding: 6px 8px;
       background: rgba(15, 40, 50, 0.8);
       border: 1px solid rgba(94, 234, 212, 0.3);
       border-radius: 6px;
       color: #eee;
-      font-size: 13px;
+      font-size: 12px;
       font-family: inherit;
     }
 
@@ -372,11 +396,12 @@
     }
 
     .im-color-input {
-      width: 40px;
-      height: 32px;
+      width: 32px;
+      height: 28px;
       padding: 2px;
       border-radius: 6px;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .im-btn {
@@ -575,7 +600,37 @@
       }
       
       .im-properties {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, rgba(20, 60, 60, 0.95) 0%, rgba(25, 50, 80, 0.95) 100%);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(94, 234, 212, 0.3);
+        padding: 12px;
+        z-index: 1000;
+        max-height: 40vh;
+        overflow-y: auto;
         display: none;
+      }
+      
+      .im-properties.mobile-open {
+        display: block;
+      }
+      
+      .im-mobile-props-toggle {
+        display: flex !important;
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 999;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+        border: none;
+        border-radius: 50px;
+        color: #fff;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
       }
       
       .im-export-btns {
@@ -585,6 +640,17 @@
       .im-btn {
         padding: 8px 12px;
         font-size: 12px;
+      }
+      
+      #im-props-content {
+        max-height: none;
+      }
+    }
+    
+    /* Desktop: hide mobile toggle */
+    @media (min-width: 769px) {
+      .im-mobile-props-toggle {
+        display: none !important;
       }
     }
   `;
@@ -722,6 +788,9 @@
           </div>
         </div>
       </div>
+      
+      <!-- Mobile Properties Toggle -->
+      <button class="im-mobile-props-toggle" id="im-mobile-props-toggle">⚙️ Properties</button>
     </div>
   `;
 
@@ -1363,8 +1432,21 @@
       render();
     };
 
+    // Scroll wheel zoom
+    canvasWrap.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -10 : 10;
+      let newZoom = Math.round(zoom * 100) + delta;
+      newZoom = Math.max(25, Math.min(200, newZoom));
+      zoom = newZoom / 100;
+      zoomSlider.value = newZoom;
+      zoomLabel.textContent = newZoom + '%';
+      fitCanvasToContainer();
+    }, { passive: false });
+
     // Canvas mouse events
     let startLayer = null;
+    let resizeHandle = null; // Track which resize handle is being dragged
 
     // Get mouse coordinates accounting for canvas scaling
     function getCanvasCoords(e) {
@@ -1377,10 +1459,46 @@
       };
     }
 
+    // Check if mouse is over a resize handle
+    function getResizeHandle(x, y, layer) {
+      if (!layer) return null;
+      const bounds = getLayerBounds(layer);
+      const handleSize = 12;
+      const handles = [
+        { name: 'nw', x: bounds.x, y: bounds.y },
+        { name: 'ne', x: bounds.x + bounds.width, y: bounds.y },
+        { name: 'sw', x: bounds.x, y: bounds.y + bounds.height },
+        { name: 'se', x: bounds.x + bounds.width, y: bounds.y + bounds.height },
+        { name: 'n', x: bounds.x + bounds.width/2, y: bounds.y },
+        { name: 's', x: bounds.x + bounds.width/2, y: bounds.y + bounds.height },
+        { name: 'w', x: bounds.x, y: bounds.y + bounds.height/2 },
+        { name: 'e', x: bounds.x + bounds.width, y: bounds.y + bounds.height/2 }
+      ];
+      
+      for (const h of handles) {
+        if (Math.abs(x - h.x) <= handleSize && Math.abs(y - h.y) <= handleSize) {
+          return h.name;
+        }
+      }
+      return null;
+    }
+
     canvas.onmousedown = (e) => {
       const { x, y } = getCanvasCoords(e);
 
       if (currentTool === 'select') {
+        // Check for resize handle first
+        if (selectedLayerIdx >= 0) {
+          const handle = getResizeHandle(x, y, layers[selectedLayerIdx]);
+          if (handle) {
+            resizeHandle = handle;
+            isDragging = true;
+            dragStart = { x, y };
+            render();
+            return;
+          }
+        }
+
         // Find clicked layer (top to bottom)
         selectedLayerIdx = -1;
         for (let i = layers.length - 1; i >= 0; i--) {
@@ -1424,14 +1542,46 @@
     };
 
     canvas.onmousemove = (e) => {
-      if (!isDragging) return;
-
       const { x, y } = getCanvasCoords(e);
+      
+      // Update cursor for resize handles when not dragging
+      if (!isDragging && currentTool === 'select' && selectedLayerIdx >= 0) {
+        const handle = getResizeHandle(x, y, layers[selectedLayerIdx]);
+        if (handle) {
+          const cursors = { 'nw': 'nwse-resize', 'se': 'nwse-resize', 'ne': 'nesw-resize', 'sw': 'nesw-resize', 'n': 'ns-resize', 's': 'ns-resize', 'e': 'ew-resize', 'w': 'ew-resize' };
+          canvas.style.cursor = cursors[handle];
+        } else {
+          canvas.style.cursor = 'crosshair';
+        }
+      }
+      
+      if (!isDragging) return;
 
       if (currentTool === 'select' && selectedLayerIdx >= 0) {
         const layer = layers[selectedLayerIdx];
-        layer.x = x - dragOffset.x;
-        layer.y = y - dragOffset.y;
+        
+        if (resizeHandle) {
+          // Resizing
+          const bounds = getLayerBounds(layer);
+          const dx = x - dragStart.x;
+          const dy = y - dragStart.y;
+          
+          if (layer.type === LAYER_TYPES.IMAGE || layer.type === LAYER_TYPES.RECT) {
+            if (resizeHandle.includes('e')) layer.width = Math.max(10, bounds.width + dx);
+            if (resizeHandle.includes('w')) { layer.x += dx; layer.width = Math.max(10, bounds.width - dx); }
+            if (resizeHandle.includes('s')) layer.height = Math.max(10, bounds.height + dy);
+            if (resizeHandle.includes('n')) { layer.y += dy; layer.height = Math.max(10, bounds.height - dy); }
+          } else if (layer.type === LAYER_TYPES.CIRCLE) {
+            layer.radius = Math.max(5, Math.sqrt((x - layer.x) ** 2 + (y - layer.y) ** 2));
+          } else if (layer.type === LAYER_TYPES.TEXT) {
+            layer.fontSize = Math.max(8, layer.fontSize + Math.max(dx, dy) / 5);
+          }
+          dragStart = { x, y };
+        } else {
+          // Moving
+          layer.x = x - dragOffset.x;
+          layer.y = y - dragOffset.y;
+        }
       } else if (currentTool === 'rect' && startLayer) {
         startLayer.width = x - dragStart.x;
         startLayer.height = y - dragStart.y;
@@ -1450,6 +1600,7 @@
     canvas.onmouseup = () => {
       isDragging = false;
       startLayer = null;
+      resizeHandle = null;
       renderLayersList(rootEl);
       renderProperties(rootEl);
     };
@@ -1599,8 +1750,21 @@
         render();
         renderLayersList(rootEl);
         renderProperties(rootEl);
+        // Also close mobile properties panel
+        const propsPanel = rootEl.querySelector('.im-properties');
+        if (propsPanel) propsPanel.classList.remove('mobile-open');
       }
     });
+
+    // Mobile properties toggle
+    const mobileToggle = rootEl.querySelector('#im-mobile-props-toggle');
+    const propsPanel = rootEl.querySelector('.im-properties');
+    if (mobileToggle && propsPanel) {
+      mobileToggle.onclick = () => {
+        propsPanel.classList.toggle('mobile-open');
+        mobileToggle.textContent = propsPanel.classList.contains('mobile-open') ? '✕ Close' : '⚙️ Properties';
+      };
+    }
   }
 
   function mount(selectorOrEl, options = {}) {
