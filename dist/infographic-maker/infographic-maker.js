@@ -23,16 +23,18 @@
   const STYLE = `
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
     
-    /* OSRS-style font - using web-safe fallback */
+    /* OSRS-style font */
     @font-face {
-      font-family: 'RuneScape';
-      src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
+      font-family: 'RuneScape UF';
+      src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@5ebfb30/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
       font-display: swap;
+      font-weight: normal;
+      font-style: normal;
     }
     
     /* Fallback if font fails */
     .runescape-font {
-      font-family: 'RuneScape', 'Trebuchet MS', 'Arial Black', sans-serif;
+      font-family: 'RuneScape UF', 'Trebuchet MS', 'Arial Black', sans-serif;
     }
 
     /* Override Carrd container constraints */
@@ -163,7 +165,7 @@
       border: 2px solid #3d3428;
       border-radius: 4px;
       color: #ff981f;
-      font-family: 'RuneScape', sans-serif;
+      font-family: 'RuneScape UF', 'Trebuchet MS', sans-serif;
       font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
@@ -448,6 +450,22 @@
       color: rgba(255,255,255,0.6);
       width: 50px;
       flex-shrink: 0;
+    }
+    
+    .im-checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
+    }
+    
+    .im-checkbox-label input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #5eead4;
+      cursor: pointer;
     }
 
     .im-prop-input {
@@ -1165,11 +1183,21 @@
           ...base,
           text: props.text || 'Text',
           fontSize: props.fontSize || 24,
-          fontFamily: props.fontFamily || 'RuneScape',
+          fontFamily: props.fontFamily || 'RuneScape UF',
           fill: props.fill || OSRS_COLORS.orange,
           align: props.align || 'left',
           width: props.width || 300,
-          height: props.height || 40
+          height: props.height || 40,
+          // Shadow options
+          shadowEnabled: props.shadowEnabled || false,
+          shadowColor: props.shadowColor || '#000000',
+          shadowBlur: props.shadowBlur || 4,
+          shadowOffsetX: props.shadowOffsetX || 2,
+          shadowOffsetY: props.shadowOffsetY || 2,
+          // Stroke options
+          strokeEnabled: props.strokeEnabled || false,
+          strokeColor: props.strokeColor || '#000000',
+          strokeWidth: props.strokeWidth || 2
         };
       case LAYER_TYPES.IMAGE:
         return {
@@ -1227,7 +1255,7 @@
         break;
 
       case LAYER_TYPES.TEXT:
-        ctx.font = `${layer.fontSize}px ${layer.fontFamily}`;
+        ctx.font = `${layer.fontSize}px "${layer.fontFamily}"`;
         ctx.fillStyle = layer.fill;
         ctx.textAlign = layer.align;
         ctx.textBaseline = 'top';
@@ -1238,9 +1266,34 @@
         if (layer.align === 'center') textX = layer.x + layer.width / 2;
         else if (layer.align === 'right') textX = layer.x + layer.width;
         
+        // Apply shadow if enabled
+        if (layer.shadowEnabled) {
+          ctx.shadowColor = layer.shadowColor || '#000000';
+          ctx.shadowBlur = layer.shadowBlur || 4;
+          ctx.shadowOffsetX = layer.shadowOffsetX || 2;
+          ctx.shadowOffsetY = layer.shadowOffsetY || 2;
+        }
+        
         lines.forEach((line, i) => {
-          ctx.fillText(line, textX, layer.y + i * lineHeight);
+          const yPos = layer.y + i * lineHeight;
+          
+          // Draw stroke first if enabled (behind the fill)
+          if (layer.strokeEnabled) {
+            ctx.strokeStyle = layer.strokeColor || '#000000';
+            ctx.lineWidth = layer.strokeWidth || 2;
+            ctx.lineJoin = 'round';
+            ctx.strokeText(line, textX, yPos);
+          }
+          
+          // Draw fill
+          ctx.fillText(line, textX, yPos);
         });
+        
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         break;
 
       case LAYER_TYPES.IMAGE:
@@ -1456,10 +1509,11 @@
           <div class="im-prop-row">
             <span class="im-prop-label">Font</span>
             <select class="im-prop-input" data-prop="fontFamily">
-              <option value="RuneScape" ${layer.fontFamily === 'RuneScape' ? 'selected' : ''}>RuneScape</option>
+              <option value="RuneScape UF" ${layer.fontFamily === 'RuneScape UF' || layer.fontFamily === 'RuneScape' ? 'selected' : ''}>RuneScape</option>
               <option value="Outfit" ${layer.fontFamily === 'Outfit' ? 'selected' : ''}>Outfit</option>
               <option value="Arial" ${layer.fontFamily === 'Arial' ? 'selected' : ''}>Arial</option>
               <option value="Impact" ${layer.fontFamily === 'Impact' ? 'selected' : ''}>Impact</option>
+              <option value="Georgia" ${layer.fontFamily === 'Georgia' ? 'selected' : ''}>Georgia</option>
             </select>
           </div>
           <div class="im-prop-row">
@@ -1475,6 +1529,40 @@
               <option value="center" ${layer.align === 'center' ? 'selected' : ''}>Center</option>
               <option value="right" ${layer.align === 'right' ? 'selected' : ''}>Right</option>
             </select>
+          </div>
+        </div>
+        <div class="im-prop-group">
+          <div class="im-prop-row">
+            <label class="im-checkbox-label">
+              <input type="checkbox" data-prop="strokeEnabled" ${layer.strokeEnabled ? 'checked' : ''}>
+              <span>Text Stroke</span>
+            </label>
+          </div>
+          <div class="im-prop-row" style="${layer.strokeEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Color</span>
+            <input type="color" class="im-color-input" data-prop="strokeColor" value="${layer.strokeColor || '#000000'}">
+            <span class="im-prop-label" style="width:auto;">Width</span>
+            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth || 2}" min="1" max="20" style="width:50px;">
+          </div>
+        </div>
+        <div class="im-prop-group">
+          <div class="im-prop-row">
+            <label class="im-checkbox-label">
+              <input type="checkbox" data-prop="shadowEnabled" ${layer.shadowEnabled ? 'checked' : ''}>
+              <span>Text Shadow</span>
+            </label>
+          </div>
+          <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Color</span>
+            <input type="color" class="im-color-input" data-prop="shadowColor" value="${layer.shadowColor || '#000000'}">
+            <span class="im-prop-label" style="width:auto;">Blur</span>
+            <input type="number" class="im-prop-input" data-prop="shadowBlur" value="${layer.shadowBlur || 4}" min="0" max="50" style="width:50px;">
+          </div>
+          <div class="im-prop-row" style="${layer.shadowEnabled ? '' : 'opacity:0.5;'}">
+            <span class="im-prop-label">Offset X</span>
+            <input type="number" class="im-prop-input" data-prop="shadowOffsetX" value="${layer.shadowOffsetX || 2}" style="width:50px;">
+            <span class="im-prop-label" style="width:auto;">Y</span>
+            <input type="number" class="im-prop-input" data-prop="shadowOffsetY" value="${layer.shadowOffsetY || 2}" style="width:50px;">
           </div>
         </div>
       `;
@@ -1618,9 +1706,14 @@
           name: 'Title',
           text: 'Title Here',
           fontSize: 36,
-          fontFamily: 'RuneScape',
+          fontFamily: 'RuneScape UF',
           fill: '#ff981f',
-          width: 300
+          width: 300,
+          shadowEnabled: true,
+          shadowColor: '#000000',
+          shadowBlur: 0,
+          shadowOffsetX: 2,
+          shadowOffsetY: 2
         });
         break;
       case 'osrs-bullet':
@@ -1628,7 +1721,7 @@
           name: 'Bullet List',
           text: '■ Item one\n■ Item two\n■ Item three',
           fontSize: 20,
-          fontFamily: 'RuneScape',
+          fontFamily: 'RuneScape UF',
           fill: '#00ffff',
           width: 350,
           height: 100
