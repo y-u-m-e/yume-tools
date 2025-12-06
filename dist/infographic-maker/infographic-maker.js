@@ -466,6 +466,31 @@
       flex-shrink: 0;
     }
     
+    .im-prop-label-sm {
+      font-size: 11px;
+      color: rgba(255,255,255,0.6);
+      width: 20px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    
+    .im-prop-input-sm {
+      width: 60px !important;
+      flex: none !important;
+      padding: 6px 8px;
+      background: rgba(15, 40, 50, 0.8);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
+      color: #eee;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    
+    .im-prop-input-sm:focus {
+      outline: none;
+      border-color: #5eead4;
+    }
+    
     .im-checkbox-label {
       display: flex;
       align-items: center;
@@ -1675,20 +1700,20 @@
           <input type="text" class="im-prop-input" data-prop="name" value="${escapeHtml(layer.name)}">
         </div>
         <div class="im-prop-row">
-          <span class="im-prop-label">X</span>
-          <input type="number" class="im-prop-input" data-prop="x" value="${Math.round(layer.x)}" style="width:70px;">
-          <span class="im-prop-label" style="width:20px;">Y</span>
-          <input type="number" class="im-prop-input" data-prop="y" value="${Math.round(layer.y)}" style="width:70px;">
+          <span class="im-prop-label-sm">X</span>
+          <input type="number" class="im-prop-input-sm" data-prop="x" value="${Math.round(layer.x)}">
+          <span class="im-prop-label-sm">Y</span>
+          <input type="number" class="im-prop-input-sm" data-prop="y" value="${Math.round(layer.y)}">
         </div>
     `;
 
     if (layer.type !== LAYER_TYPES.LINE) {
       html += `
         <div class="im-prop-row">
-          <span class="im-prop-label">Width</span>
-          <input type="number" class="im-prop-input" data-prop="width" value="${Math.round(layer.width)}" style="width:70px;">
-          <span class="im-prop-label" style="width:20px;">H</span>
-          <input type="number" class="im-prop-input" data-prop="height" value="${Math.round(layer.height)}" style="width:70px;">
+          <span class="im-prop-label-sm">W</span>
+          <input type="number" class="im-prop-input-sm" data-prop="width" value="${Math.round(layer.width)}">
+          <span class="im-prop-label-sm">H</span>
+          <input type="number" class="im-prop-input-sm" data-prop="height" value="${Math.round(layer.height)}">
         </div>
       `;
     }
@@ -1724,11 +1749,11 @@
           <div class="im-prop-row">
             <span class="im-prop-label">Stroke</span>
             <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#000000'}">
-            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;" placeholder="Width">
+            <input type="number" class="im-prop-input-sm" data-prop="strokeWidth" value="${layer.strokeWidth}" placeholder="Width">
           </div>
           <div class="im-prop-row">
             <span class="im-prop-label">Radius</span>
-            <input type="number" class="im-prop-input" data-prop="borderRadius" value="${layer.borderRadius || 0}">
+            <input type="number" class="im-prop-input-sm" data-prop="borderRadius" value="${layer.borderRadius || 0}">
           </div>
         </div>
       `;
@@ -1750,8 +1775,8 @@
           </div>
           <div class="im-prop-row">
             <span class="im-prop-label">Size</span>
-            <input type="number" class="im-prop-input" data-prop="fontSize" value="${layer.fontSize}" style="width:60px;">
-            <span class="im-prop-label" style="width:auto;">Color</span>
+            <input type="number" class="im-prop-input-sm" data-prop="fontSize" value="${layer.fontSize}">
+            <span class="im-prop-label-sm">Color</span>
             <input type="color" class="im-color-input" data-prop="fill" value="${layer.fill || '#ffffff'}">
           </div>
           <div class="im-prop-row">
@@ -1815,7 +1840,7 @@
         <div class="im-prop-group">
           <div class="im-prop-row">
             <span class="im-prop-label">Radius</span>
-            <input type="number" class="im-prop-input" data-prop="radius" value="${layer.radius}">
+            <input type="number" class="im-prop-input-sm" data-prop="radius" value="${layer.radius}">
           </div>
           <div class="im-prop-row">
             <span class="im-prop-label">Fill</span>
@@ -1824,7 +1849,7 @@
           <div class="im-prop-row">
             <span class="im-prop-label">Stroke</span>
             <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#00ffff'}">
-            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;">
+            <input type="number" class="im-prop-input-sm" data-prop="strokeWidth" value="${layer.strokeWidth}" placeholder="Width">
           </div>
         </div>
       `;
@@ -1834,16 +1859,15 @@
       html += `
         <div class="im-prop-group">
           <div class="im-prop-row">
-            <span class="im-prop-label">End X</span>
-            <input type="number" class="im-prop-input" data-prop="x2" value="${Math.round(layer.x2)}" style="width:70px;">
-            <span class="im-prop-label" style="width:40px;">End Y</span>
-            <input type="number" class="im-prop-input" data-prop="y2" value="${Math.round(layer.y2)}" style="width:70px;">
+            <span class="im-prop-label-sm">X2</span>
+            <input type="number" class="im-prop-input-sm" data-prop="x2" value="${Math.round(layer.x2)}">
+            <span class="im-prop-label-sm">Y2</span>
+            <input type="number" class="im-prop-input-sm" data-prop="y2" value="${Math.round(layer.y2)}">
           </div>
           <div class="im-prop-row">
             <span class="im-prop-label">Color</span>
             <input type="color" class="im-color-input" data-prop="stroke" value="${layer.stroke || '#00ffff'}">
-            <span class="im-prop-label" style="width:40px;">Width</span>
-            <input type="number" class="im-prop-input" data-prop="strokeWidth" value="${layer.strokeWidth}" style="width:50px;">
+            <input type="number" class="im-prop-input-sm" data-prop="strokeWidth" value="${layer.strokeWidth}" placeholder="Width">
           </div>
         </div>
       `;
