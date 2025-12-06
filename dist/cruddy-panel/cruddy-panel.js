@@ -285,10 +285,23 @@
       font-family: inherit;
       transition: border-color 0.3s, box-shadow 0.3s;
     }
-    #cruddy-panel .cp-form-group input:focus {
+    #cruddy-panel .cp-form-group input:focus,
+    #cruddy-panel .cp-form-group textarea:focus {
       outline: none;
       border-color: #5eead4;
       box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.15);
+    }
+    #cruddy-panel .cp-form-group textarea {
+      padding: 12px 14px;
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 40, 50, 0.6);
+      color: #eee;
+      font-size: 14px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
 
     /* Modal */
@@ -734,6 +747,7 @@
         <button class="cp-tab" data-tab="events">View by Event</button>
         <button class="cp-tab" data-tab="leaderboard">🏆 Leaderboard</button>
         <button class="cp-tab" data-tab="add">Add Record</button>
+        <button class="cp-tab" data-tab="add-event">Add Event</button>
       </div>
 
       <div id="cp-status"></div>
@@ -857,6 +871,28 @@
             <input type="date" id="cp-add-date">
           </div>
           <button class="cp-btn cp-btn-primary" id="cp-add-btn">Add Record</button>
+        </div>
+      </div>
+
+      <!-- Add Event Panel -->
+      <div class="cp-panel" data-panel="add-event">
+        <div class="cp-form" style="max-width: 600px;">
+          <div class="cp-form-group">
+            <label>Event Name</label>
+            <input type="text" id="cp-addevent-name" placeholder="e.g. Wildy Wednesday">
+          </div>
+          <div class="cp-form-group">
+            <label>Date</label>
+            <input type="date" id="cp-addevent-date">
+          </div>
+          <div class="cp-form-group">
+            <label>Attendees <span style="color: rgba(255,255,255,0.5); font-size: 12px;">(one per line or comma-separated)</span></label>
+            <textarea id="cp-addevent-players" rows="8" placeholder="Player1&#10;Player2&#10;Player3&#10;&#10;or: Player1, Player2, Player3"></textarea>
+          </div>
+          <div class="cp-form-group">
+            <div id="cp-addevent-preview" style="font-size: 13px; color: rgba(255,255,255,0.5);"></div>
+          </div>
+          <button class="cp-btn cp-btn-primary" id="cp-addevent-btn">Add Event</button>
         </div>
       </div>
     </div>
@@ -1277,6 +1313,85 @@
         loadRecords(rootEl);
       } catch (err) {
         showStatus(rootEl, 'Failed to add record: ' + err.message, 'error');
+      }
+    };
+
+    // Add event (bulk add)
+    rootEl.querySelector('#cp-addevent-date').valueAsDate = new Date();
+    
+    // Helper to parse player names from textarea
+    const parsePlayerNames = (text) => {
+      return text
+        .split(/[\n,]+/)  // Split by newlines or commas
+        .map(name => name.trim())
+        .filter(name => name.length > 0);
+    };
+
+    // Preview update
+    const playersTextarea = rootEl.querySelector('#cp-addevent-players');
+    const previewEl = rootEl.querySelector('#cp-addevent-preview');
+    const updatePreview = () => {
+      const players = parsePlayerNames(playersTextarea.value);
+      if (players.length === 0) {
+        previewEl.textContent = '';
+      } else {
+        previewEl.textContent = `📝 ${players.length} attendee${players.length !== 1 ? 's' : ''} will be added`;
+      }
+    };
+    playersTextarea.addEventListener('input', updatePreview);
+
+    rootEl.querySelector('#cp-addevent-btn').onclick = async () => {
+      const eventName = rootEl.querySelector('#cp-addevent-name').value.trim();
+      const date = rootEl.querySelector('#cp-addevent-date').value;
+      const players = parsePlayerNames(playersTextarea.value);
+
+      if (!eventName || !date) {
+        showStatus(rootEl, 'Event name and date are required', 'error');
+        return;
+      }
+
+      if (players.length === 0) {
+        showStatus(rootEl, 'Please enter at least one attendee', 'error');
+        return;
+      }
+
+      const btn = rootEl.querySelector('#cp-addevent-btn');
+      btn.disabled = true;
+      btn.textContent = `Adding ${players.length} records...`;
+
+      let successCount = 0;
+      let failCount = 0;
+
+      try {
+        for (const player of players) {
+          try {
+            await addRecord(player, eventName, date);
+            successCount++;
+          } catch (err) {
+            failCount++;
+            console.error(`Failed to add record for ${player}:`, err);
+          }
+        }
+
+        if (failCount === 0) {
+          showStatus(rootEl, `Successfully added ${successCount} attendance record${successCount !== 1 ? 's' : ''}!`, 'success');
+        } else {
+          showStatus(rootEl, `Added ${successCount} records, ${failCount} failed`, failCount > successCount ? 'error' : 'info');
+        }
+
+        // Clear form on success
+        if (successCount > 0) {
+          rootEl.querySelector('#cp-addevent-name').value = '';
+          playersTextarea.value = '';
+          updatePreview();
+          // Switch to events tab to see the new event
+          tabs[1].click();
+        }
+      } catch (err) {
+        showStatus(rootEl, 'Failed to add event: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Add Event';
       }
     };
 
