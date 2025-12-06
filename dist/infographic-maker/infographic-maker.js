@@ -26,13 +26,14 @@
     /* OSRS-style font */
     @font-face {
       font-family: 'RuneScape';
-      src: url('https://cdn.jsdelivr.net/gh/nicholasrobinson/runescape-font@master/runescape_uf.ttf') format('truetype');
+      src: url('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/fonts/runescape_uf.ttf') format('truetype');
     }
 
     #infographic-maker {
       font-family: 'Outfit', sans-serif;
-      max-width: 1400px;
-      margin: 20px auto;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
       padding: 20px;
       background: linear-gradient(135deg, rgba(20, 60, 60, 0.7) 0%, rgba(25, 50, 80, 0.7) 100%);
       backdrop-filter: blur(12px);
@@ -52,9 +53,9 @@
 
     .im-container {
       display: grid;
-      grid-template-columns: 280px 1fr 240px;
-      gap: 20px;
-      min-height: 600px;
+      grid-template-columns: 260px minmax(0, 1fr) 220px;
+      gap: 15px;
+      min-height: 500px;
     }
 
     /* Sidebar - Tools & Layers */
@@ -283,21 +284,23 @@
       background: repeating-conic-gradient(#1a1a1a 0% 25%, #222 0% 50%) 50% / 20px 20px;
       border-radius: 10px;
       overflow: auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
-      min-height: 500px;
+      min-height: 400px;
+      max-height: 600px;
     }
 
     .im-canvas-container {
       position: relative;
       box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      display: inline-block;
+      margin: 0 auto;
     }
 
     #im-canvas {
       display: block;
       cursor: crosshair;
+      max-width: 100%;
+      height: auto;
     }
 
     /* Properties panel */
@@ -1085,7 +1088,7 @@
     });
   }
 
-  function addPreset(preset, rootEl) {
+  async function addPreset(preset, rootEl) {
     let layer;
     switch (preset) {
       case 'osrs-panel':
@@ -1100,14 +1103,28 @@
         });
         break;
       case 'osrs-inventory':
-        layer = createLayer(LAYER_TYPES.RECT, {
-          name: 'Inventory Slot',
-          width: 250,
-          height: 300,
-          fill: 'rgba(60, 50, 40, 0.8)',
-          stroke: '#3d3428',
-          strokeWidth: 3
-        });
+        // Load inventory image preset
+        try {
+          const invImg = await loadImage('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png');
+          layer = createLayer(LAYER_TYPES.IMAGE, {
+            name: 'Inventory',
+            image: invImg,
+            src: 'https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png',
+            width: invImg.width,
+            height: invImg.height
+          });
+        } catch (err) {
+          console.error('Failed to load inventory preset:', err);
+          // Fallback to rectangle
+          layer = createLayer(LAYER_TYPES.RECT, {
+            name: 'Inventory Slot',
+            width: 250,
+            height: 300,
+            fill: 'rgba(60, 50, 40, 0.8)',
+            stroke: '#3d3428',
+            strokeWidth: 3
+          });
+        }
         break;
       case 'osrs-title':
         layer = createLayer(LAYER_TYPES.TEXT, {
