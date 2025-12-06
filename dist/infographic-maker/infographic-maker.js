@@ -1157,19 +1157,25 @@
           </div>
 
           <div class="im-panel">
-            <div class="im-panel-header">📦 OSRS Presets</div>
+            <div class="im-panel-header">🎮 OSRS Assets</div>
+            <div class="im-panel-content">
+              <div class="im-presets">
+                <button class="im-preset-btn" id="im-skill-icons-btn">⚔️ Skills</button>
+                <button class="im-preset-btn" id="im-prayer-icons-btn">🙏 Prayers</button>
+                <button class="im-preset-btn" data-preset="osrs-inventory">🎒 Inventory BG</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="im-panel">
+            <div class="im-panel-header">📦 Common Presets</div>
             <div class="im-panel-content">
               <div class="im-presets">
                 <button class="im-preset-btn" data-preset="osrs-panel">Dark Panel</button>
-                <button class="im-preset-btn" data-preset="osrs-inventory">Inventory</button>
                 <button class="im-preset-btn" data-preset="osrs-title">Title Box</button>
                 <button class="im-preset-btn" data-preset="osrs-bullet">Bullet List</button>
                 <button class="im-preset-btn" data-preset="osrs-border-cyan">Cyan Border</button>
                 <button class="im-preset-btn" data-preset="osrs-border-pink">Pink Border</button>
-              </div>
-              <div style="margin-top: 10px; display: flex; gap: 6px;">
-                <button class="im-btn im-btn-secondary" id="im-skill-icons-btn" style="flex: 1;">⚔️ Skills</button>
-                <button class="im-btn im-btn-secondary" id="im-prayer-icons-btn" style="flex: 1;">🙏 Prayers</button>
               </div>
             </div>
           </div>
@@ -1901,7 +1907,7 @@
         try {
           const invImg = await loadImage('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png');
           layer = createLayer(LAYER_TYPES.IMAGE, {
-            name: 'Inventory',
+            name: 'Inventory Backdrop',
             image: invImg,
             src: 'https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png',
             width: invImg.width,
@@ -1911,7 +1917,7 @@
           console.error('Failed to load inventory preset:', err);
           // Fallback to rectangle
           layer = createLayer(LAYER_TYPES.RECT, {
-            name: 'Inventory Slot',
+            name: 'Inventory Backdrop',
             width: 250,
             height: 300,
             fill: 'rgba(60, 50, 40, 0.8)',
