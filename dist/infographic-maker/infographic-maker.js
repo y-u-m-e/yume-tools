@@ -311,6 +311,32 @@
       margin: 0 5px;
     }
     
+    .im-custom-size-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    
+    .im-custom-size-inputs input {
+      padding: 6px 8px;
+      background: rgba(15, 40, 50, 0.8);
+      border: 1px solid rgba(94, 234, 212, 0.3);
+      border-radius: 6px;
+      color: #eee;
+      font-size: 12px;
+      font-family: inherit;
+    }
+    
+    .im-custom-size-inputs span {
+      color: rgba(255,255,255,0.5);
+    }
+    
+    .im-btn-sm {
+      padding: 6px 12px !important;
+      font-size: 11px !important;
+    }
+    
     .im-export-btns {
       display: flex;
       gap: 8px;
@@ -999,9 +1025,16 @@
                 <option value="1280x720">1280 × 720 (HD)</option>
                 <option value="1920x1080">1920 × 1080 (Full HD)</option>
                 <option value="800x600">800 × 600</option>
-                <option value="600x400">600 × 400 (Discord)</option>
+                <option value="800x320">800 × 320 (Discord Banner)</option>
+                <option value="600x400">600 × 400 (Discord Embed)</option>
                 <option value="custom">Custom...</option>
               </select>
+              <div class="im-custom-size-inputs" id="im-custom-size-inputs" style="display:none;">
+                <input type="number" id="im-custom-width" placeholder="Width" min="100" max="4096" style="width:70px;">
+                <span>×</span>
+                <input type="number" id="im-custom-height" placeholder="Height" min="100" max="4096" style="width:70px;">
+                <button class="im-btn im-btn-sm" id="im-apply-custom-size">Apply</button>
+              </div>
             </div>
             <div class="im-toolbar-divider"></div>
             <div class="im-toolbar-group">
@@ -1675,13 +1708,49 @@
     });
 
     // Canvas size
-    rootEl.querySelector('#im-canvas-size').onchange = (e) => {
-      const [w, h] = e.target.value.split('x').map(Number);
-      if (w && h) {
+    const sizeSelect = rootEl.querySelector('#im-canvas-size');
+    const customSizeInputs = rootEl.querySelector('#im-custom-size-inputs');
+    const customWidthInput = rootEl.querySelector('#im-custom-width');
+    const customHeightInput = rootEl.querySelector('#im-custom-height');
+    const applyCustomSizeBtn = rootEl.querySelector('#im-apply-custom-size');
+    
+    sizeSelect.onchange = (e) => {
+      if (e.target.value === 'custom') {
+        // Show custom inputs
+        customSizeInputs.style.display = 'flex';
+        customWidthInput.value = canvas.width;
+        customHeightInput.value = canvas.height;
+      } else {
+        // Hide custom inputs and apply preset size
+        customSizeInputs.style.display = 'none';
+        const [w, h] = e.target.value.split('x').map(Number);
+        if (w && h) {
+          canvas.width = w;
+          canvas.height = h;
+          render();
+          fitCanvasToContainer();
+        }
+      }
+    };
+    
+    // Apply custom size
+    applyCustomSizeBtn.onclick = () => {
+      const w = parseInt(customWidthInput.value, 10);
+      const h = parseInt(customHeightInput.value, 10);
+      if (w >= 100 && w <= 4096 && h >= 100 && h <= 4096) {
         canvas.width = w;
         canvas.height = h;
         render();
         fitCanvasToContainer();
+      } else {
+        alert('Size must be between 100 and 4096 pixels');
+      }
+    };
+    
+    // Allow Enter key to apply custom size
+    customWidthInput.onkeydown = customHeightInput.onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        applyCustomSizeBtn.click();
       }
     };
 
