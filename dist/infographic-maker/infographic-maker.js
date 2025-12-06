@@ -1433,10 +1433,8 @@
     ctx.save();
     ctx.globalAlpha = layer.opacity;
     
-    // Apply blur
-    if (layer.blur > 0) {
-      ctx.filter = `blur(${layer.blur}px)`;
-    }
+    // Apply blur (explicitly reset to none if not blurring)
+    ctx.filter = layer.blur > 0 ? `blur(${layer.blur}px)` : 'none';
     
     // Apply rotation around center of layer
     if (layer.rotation !== 0) {
