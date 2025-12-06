@@ -508,147 +508,272 @@
         grid-template-columns: 220px 1fr;
       }
       .im-properties {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+        background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(94, 234, 212, 0.3);
+        border-radius: 16px 16px 0 0;
+        padding: 15px;
+        z-index: 1000;
+        overflow-y: auto;
         display: none;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+      }
+      .im-properties.mobile-open {
+        display: block;
+      }
+      .im-mobile-props-toggle {
+        display: flex !important;
       }
     }
 
     /* Responsive - Mobile */
     @media (max-width: 768px) {
       #infographic-root {
-        width: calc(100vw - 20px) !important;
+        width: calc(100vw - 16px) !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
       
       #infographic-maker {
-        padding: 12px;
+        padding: 10px;
         height: auto;
         min-height: auto;
+        border-radius: 12px;
       }
       
       #infographic-maker h2 {
-        font-size: 18px;
-        margin-bottom: 12px;
+        font-size: 16px;
+        margin-bottom: 10px;
       }
       
       .im-container {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: 10px;
         height: auto;
       }
       
       .im-sidebar {
-        order: 1;
-        height: auto;
-        max-height: none;
+        order: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
       
       .im-canvas-area {
-        order: 2;
-        height: auto;
+        order: 1;
       }
       
       .im-canvas-wrap {
-        min-height: 300px;
-        height: 50vh;
+        min-height: 250px;
+        height: 40vh;
+        max-height: 350px;
       }
       
       .im-canvas-toolbar {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
         padding: 8px;
       }
       
       .im-toolbar-group {
-        flex: 1;
-        min-width: 100px;
+        flex: 1 1 45%;
+        min-width: 80px;
+      }
+      
+      .im-toolbar-group select,
+      .im-toolbar-group input {
+        width: 100%;
+        padding: 6px 8px;
+        font-size: 12px;
       }
       
       .im-toolbar-divider {
         display: none;
       }
       
+      /* Tools: 3 columns on mobile for better touch targets */
       .im-tools {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
       }
       
       .im-tool-btn {
-        padding: 8px 4px;
-        font-size: 10px;
+        padding: 10px 6px;
+        font-size: 11px;
       }
       
       .im-tool-btn .icon {
-        font-size: 16px;
+        font-size: 18px;
       }
       
+      /* Presets: 2 columns on mobile */
       .im-presets {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
       }
       
       .im-preset-btn {
-        padding: 6px;
-        font-size: 10px;
+        padding: 8px 6px;
+        font-size: 11px;
+      }
+      
+      .im-panel {
+        border-radius: 10px;
       }
       
       .im-panel-header {
-        padding: 8px 12px;
-        font-size: 12px;
+        padding: 10px 12px;
+        font-size: 13px;
       }
       
       .im-panel-content {
-        padding: 8px;
+        padding: 10px;
       }
       
+      /* Layers panel adjustments */
+      .im-layers {
+        max-height: 150px;
+      }
+      
+      .im-layer {
+        padding: 8px 10px;
+      }
+      
+      .im-layer-thumb {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+      }
+      
+      .im-layer-name {
+        font-size: 12px;
+      }
+      
+      .im-layer-order-btns {
+        flex-direction: row;
+        gap: 4px;
+      }
+      
+      .im-layer-order-btns .im-btn {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+      
+      /* Properties panel - slides up from bottom */
       .im-properties {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        background: linear-gradient(135deg, rgba(20, 60, 60, 0.95) 0%, rgba(25, 50, 80, 0.95) 100%);
+        width: 100%;
+        height: auto;
+        max-height: 60vh;
+        background: linear-gradient(135deg, rgba(20, 60, 60, 0.98) 0%, rgba(25, 50, 80, 0.98) 100%);
         backdrop-filter: blur(12px);
-        border-top: 1px solid rgba(94, 234, 212, 0.3);
-        padding: 12px;
+        border-top: 2px solid rgba(94, 234, 212, 0.4);
+        border-radius: 16px 16px 0 0;
+        padding: 15px;
         z-index: 1000;
-        max-height: 40vh;
         overflow-y: auto;
         display: none;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+        transform: translateY(0);
+        transition: transform 0.3s ease-out;
       }
       
       .im-properties.mobile-open {
         display: block;
       }
       
-      .im-mobile-props-toggle {
-        display: flex !important;
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        z-index: 999;
-        padding: 12px 16px;
-        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
-        border: none;
-        border-radius: 50px;
-        color: #fff;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(20, 184, 166, 0.4);
+      .im-properties .im-panel-header {
+        position: sticky;
+        top: -15px;
+        margin: -15px -15px 10px -15px;
+        padding: 12px 15px;
+        background: rgba(15, 40, 50, 0.95);
+        z-index: 1;
       }
       
+      /* Mobile properties toggle button */
+      .im-mobile-props-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        z-index: 999;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        color: #fff;
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 20px rgba(20, 184, 166, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .im-mobile-props-toggle:active {
+        transform: scale(0.95);
+      }
+      
+      .im-mobile-props-toggle.open {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+      }
+      
+      /* Export buttons */
       .im-export-btns {
         flex-wrap: wrap;
+        gap: 6px;
       }
       
       .im-btn {
-        padding: 8px 12px;
+        padding: 10px 14px;
         font-size: 12px;
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
       }
       
       #im-props-content {
         max-height: none;
       }
+      
+      /* Property inputs on mobile */
+      .im-prop-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      .im-prop-row label {
+        font-size: 11px;
+      }
+      
+      .im-prop-row input,
+      .im-prop-row select {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
     }
     
     /* Desktop: hide mobile toggle */
-    @media (min-width: 769px) {
+    @media (min-width: 1201px) {
       .im-mobile-props-toggle {
         display: none !important;
       }
@@ -1761,8 +1886,9 @@
     const propsPanel = rootEl.querySelector('.im-properties');
     if (mobileToggle && propsPanel) {
       mobileToggle.onclick = () => {
-        propsPanel.classList.toggle('mobile-open');
-        mobileToggle.textContent = propsPanel.classList.contains('mobile-open') ? '✕ Close' : '⚙️ Properties';
+        const isOpen = propsPanel.classList.toggle('mobile-open');
+        mobileToggle.classList.toggle('open', isOpen);
+        mobileToggle.innerHTML = isOpen ? '✕ Close' : '⚙️ Properties';
       };
     }
   }
