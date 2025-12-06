@@ -317,9 +317,36 @@
       flex-shrink: 0;
     }
     
-    /* Mobile props toggle - hidden by default */
+    /* Mobile props toggle - hidden by default, styled for when visible */
     .im-mobile-props-toggle {
       display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      z-index: 999;
+      padding: 12px 18px;
+      background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(20, 184, 166, 0.5);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .im-mobile-props-toggle:active {
+      transform: scale(0.95);
+    }
+    
+    .im-mobile-props-toggle.open {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
     }
     
     /* Mobile props header - hidden by default */
@@ -569,33 +596,6 @@
       }
       .im-mobile-props-toggle {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        position: absolute;
-        bottom: 10px;
-        left: 10px;
-        z-index: 999;
-        padding: 12px 18px;
-        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 50px;
-        color: #fff;
-        font-family: 'Outfit', sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(20, 184, 166, 0.5);
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-      
-      .im-mobile-props-toggle:active {
-        transform: scale(0.95);
-      }
-      
-      .im-mobile-props-toggle.open {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
       }
       
       #infographic-maker {
@@ -866,33 +866,8 @@
       
       .im-mobile-props-toggle {
         display: flex !important;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        position: absolute;
-        bottom: 10px;
         right: 10px;
-        z-index: 999;
-        padding: 12px 18px;
-        background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 50px;
-        color: #fff;
-        font-family: 'Outfit', sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(20, 184, 166, 0.5);
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-      
-      .im-mobile-props-toggle:active {
-        transform: scale(0.95);
-      }
-      
-      .im-mobile-props-toggle.open {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);
+        left: auto;
       }
       
       /* Export buttons */
