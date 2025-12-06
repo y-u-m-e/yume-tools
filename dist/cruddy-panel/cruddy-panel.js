@@ -743,8 +743,14 @@
         <div class="cp-filters">
           <input type="text" id="cp-filter-name" placeholder="Filter by name...">
           <input type="text" id="cp-filter-event" placeholder="Filter by event...">
-          <input type="date" id="cp-filter-start" title="Start date">
-          <input type="date" id="cp-filter-end" title="End date">
+          <div class="cp-control-group">
+            <label>Start Date</label>
+            <input type="datetime-local" id="cp-filter-start">
+          </div>
+          <div class="cp-control-group">
+            <label>End Date</label>
+            <input type="datetime-local" id="cp-filter-end">
+          </div>
           <button class="cp-btn cp-btn-primary" id="cp-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-clear-btn">Clear</button>
         </div>
@@ -771,8 +777,14 @@
       <div class="cp-panel" data-panel="events">
         <div class="cp-filters">
           <input type="text" id="cp-event-filter-event" placeholder="Filter by event name...">
-          <input type="date" id="cp-event-filter-start" title="Start date">
-          <input type="date" id="cp-event-filter-end" title="End date">
+          <div class="cp-control-group">
+            <label>Start Date</label>
+            <input type="datetime-local" id="cp-event-filter-start">
+          </div>
+          <div class="cp-control-group">
+            <label>End Date</label>
+            <input type="datetime-local" id="cp-event-filter-end">
+          </div>
           <button class="cp-btn cp-btn-primary" id="cp-event-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-event-clear-btn">Clear</button>
         </div>
