@@ -1905,11 +1905,11 @@
       case 'osrs-inventory':
         // Load inventory image preset
         try {
-          const invImg = await loadImage('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png');
+          const invImg = await loadImage('https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/poll_backdrop.png');
           layer = createLayer(LAYER_TYPES.IMAGE, {
             name: 'Poll Backdrop',
             image: invImg,
-            src: 'https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/inventory.png',
+            src: 'https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/poll_backdrop.png',
             width: invImg.width,
             height: invImg.height
           });
