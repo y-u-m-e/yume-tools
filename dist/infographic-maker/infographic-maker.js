@@ -1064,6 +1064,35 @@
                 <button class="im-preset-btn" data-preset="osrs-border-cyan">Cyan Border</button>
                 <button class="im-preset-btn" data-preset="osrs-border-pink">Pink Border</button>
               </div>
+              <div style="margin-top: 10px;">
+                <label style="font-size: 11px; color: rgba(255,255,255,0.6); display: block; margin-bottom: 4px;">Skill Icons</label>
+                <select id="im-skill-icon-select" class="im-prop-input" style="width: 100%;">
+                  <option value="">Select a skill...</option>
+                  <option value="Agility_icon">Agility</option>
+                  <option value="Attack_icon">Attack</option>
+                  <option value="Construction_icon">Construction</option>
+                  <option value="Cooking_icon">Cooking</option>
+                  <option value="Crafting_icon">Crafting</option>
+                  <option value="Defence_icon">Defence</option>
+                  <option value="Farming_icon">Farming</option>
+                  <option value="Firemaking_icon">Firemaking</option>
+                  <option value="Fishing_icon">Fishing</option>
+                  <option value="Fletching_icon">Fletching</option>
+                  <option value="Herblore_icon">Herblore</option>
+                  <option value="Hitpoints_icon">Hitpoints</option>
+                  <option value="Hunter_icon">Hunter</option>
+                  <option value="Magic_icon">Magic</option>
+                  <option value="Mining_icon">Mining</option>
+                  <option value="Prayer_icon">Prayer</option>
+                  <option value="Ranged_icon">Ranged</option>
+                  <option value="Runecraft_icon">Runecraft</option>
+                  <option value="Slayer_icon">Slayer</option>
+                  <option value="Smithing_icon">Smithing</option>
+                  <option value="Strength_icon">Strength</option>
+                  <option value="Thieving_icon">Thieving</option>
+                  <option value="Woodcutting_icon">Woodcutting</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -1886,6 +1915,37 @@
       btn.onclick = () => addPreset(btn.dataset.preset, rootEl);
     });
 
+    // Skill icon select
+    const skillIconSelect = rootEl.querySelector('#im-skill-icon-select');
+    if (skillIconSelect) {
+      skillIconSelect.onchange = async (e) => {
+        const iconName = e.target.value;
+        if (!iconName) return;
+        
+        try {
+          const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Skill_Icons/${iconName}.png`;
+          const img = await loadImage(iconUrl);
+          const layer = createLayer(LAYER_TYPES.IMAGE, {
+            name: iconName.replace('_icon', '').replace('_', ' '),
+            image: img,
+            src: iconUrl,
+            width: img.width,
+            height: img.height
+          });
+          layers.push(layer);
+          selectedLayerIdx = layers.length - 1;
+          render();
+          renderLayersList(rootEl);
+          renderProperties(rootEl);
+        } catch (err) {
+          console.error('Failed to load skill icon:', err);
+        }
+        
+        // Reset dropdown
+        e.target.value = '';
+      };
+    }
+
     // Canvas size
     const sizeSelect = rootEl.querySelector('#im-canvas-size');
     const customSizeInputs = rootEl.querySelector('#im-custom-size-inputs');
@@ -2085,15 +2145,15 @@
           const dx = x - dragStart.x;
           const dy = y - dragStart.y;
           
-          if (layer.type === LAYER_TYPES.IMAGE || layer.type === LAYER_TYPES.RECT) {
+          if (layer.type === LAYER_TYPES.IMAGE || layer.type === LAYER_TYPES.RECT || layer.type === LAYER_TYPES.TEXT) {
+            // Handle width changes
             if (resizeHandle.includes('e')) layer.width = Math.max(10, bounds.width + dx);
             if (resizeHandle.includes('w')) { layer.x += dx; layer.width = Math.max(10, bounds.width - dx); }
+            // Handle height changes
             if (resizeHandle.includes('s')) layer.height = Math.max(10, bounds.height + dy);
             if (resizeHandle.includes('n')) { layer.y += dy; layer.height = Math.max(10, bounds.height - dy); }
           } else if (layer.type === LAYER_TYPES.CIRCLE) {
             layer.radius = Math.max(5, Math.sqrt((x - layer.x) ** 2 + (y - layer.y) ** 2));
-          } else if (layer.type === LAYER_TYPES.TEXT) {
-            layer.fontSize = Math.max(8, layer.fontSize + Math.max(dx, dy) / 5);
           }
           dragStart = { x, y };
         } else {
