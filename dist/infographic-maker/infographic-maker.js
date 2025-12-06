@@ -1700,20 +1700,24 @@
           <input type="text" class="im-prop-input" data-prop="name" value="${escapeHtml(layer.name)}">
         </div>
         <div class="im-prop-row">
-          <span class="im-prop-label-sm">X</span>
-          <input type="number" class="im-prop-input-sm" data-prop="x" value="${Math.round(layer.x)}">
-          <span class="im-prop-label-sm">Y</span>
-          <input type="number" class="im-prop-input-sm" data-prop="y" value="${Math.round(layer.y)}">
+          <span class="im-prop-label">X</span>
+          <input type="number" class="im-prop-input" data-prop="x" value="${Math.round(layer.x)}">
+        </div>
+        <div class="im-prop-row">
+          <span class="im-prop-label">Y</span>
+          <input type="number" class="im-prop-input" data-prop="y" value="${Math.round(layer.y)}">
         </div>
     `;
 
     if (layer.type !== LAYER_TYPES.LINE) {
       html += `
         <div class="im-prop-row">
-          <span class="im-prop-label-sm">W</span>
-          <input type="number" class="im-prop-input-sm" data-prop="width" value="${Math.round(layer.width)}">
-          <span class="im-prop-label-sm">H</span>
-          <input type="number" class="im-prop-input-sm" data-prop="height" value="${Math.round(layer.height)}">
+          <span class="im-prop-label">Width</span>
+          <input type="number" class="im-prop-input" data-prop="width" value="${Math.round(layer.width)}">
+        </div>
+        <div class="im-prop-row">
+          <span class="im-prop-label">Height</span>
+          <input type="number" class="im-prop-input" data-prop="height" value="${Math.round(layer.height)}">
         </div>
       `;
     }
