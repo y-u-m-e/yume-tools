@@ -741,15 +741,17 @@
       <!-- View Records Panel -->
       <div class="cp-panel active" data-panel="view">
         <div class="cp-filters">
-          <input type="text" id="cp-filter-name" placeholder="Filter by name...">
-          <input type="text" id="cp-filter-event" placeholder="Filter by event...">
-          <div class="cp-control-group">
+          <input type="text" id="cp-filter-name" placeholder="Filter by name..." style="flex:1;">
+          <input type="text" id="cp-filter-event" placeholder="Filter by event..." style="flex:1;">
+        </div>
+        <div class="cp-filters" style="margin-top: 10px;">
+          <div class="cp-control-group" style="flex:1;">
             <label>Start Date</label>
-            <input type="datetime-local" id="cp-filter-start">
+            <input type="datetime-local" id="cp-filter-start" style="width:100%;">
           </div>
-          <div class="cp-control-group">
+          <div class="cp-control-group" style="flex:1;">
             <label>End Date</label>
-            <input type="datetime-local" id="cp-filter-end">
+            <input type="datetime-local" id="cp-filter-end" style="width:100%;">
           </div>
           <button class="cp-btn cp-btn-primary" id="cp-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-clear-btn">Clear</button>
@@ -776,14 +778,16 @@
       <!-- View by Event Panel -->
       <div class="cp-panel" data-panel="events">
         <div class="cp-filters">
-          <input type="text" id="cp-event-filter-event" placeholder="Filter by event name...">
-          <div class="cp-control-group">
+          <input type="text" id="cp-event-filter-event" placeholder="Filter by event name..." style="flex:1;">
+        </div>
+        <div class="cp-filters" style="margin-top: 10px;">
+          <div class="cp-control-group" style="flex:1;">
             <label>Start Date</label>
-            <input type="datetime-local" id="cp-event-filter-start">
+            <input type="datetime-local" id="cp-event-filter-start" style="width:100%;">
           </div>
-          <div class="cp-control-group">
+          <div class="cp-control-group" style="flex:1;">
             <label>End Date</label>
-            <input type="datetime-local" id="cp-event-filter-end">
+            <input type="datetime-local" id="cp-event-filter-end" style="width:100%;">
           </div>
           <button class="cp-btn cp-btn-primary" id="cp-event-search-btn">Search</button>
           <button class="cp-btn cp-btn-secondary" id="cp-event-clear-btn">Clear</button>
