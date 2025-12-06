@@ -573,6 +573,156 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      #cruddy-panel {
+        padding: 15px;
+        margin: 10px;
+        border-radius: 12px;
+      }
+      
+      #cruddy-panel h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+      }
+      
+      #cruddy-panel .cp-user-info {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+      }
+      
+      #cruddy-panel .cp-tabs {
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+      }
+      
+      #cruddy-panel .cp-tab {
+        padding: 8px 12px;
+        font-size: 12px;
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+      }
+      
+      #cruddy-panel .cp-filters {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      #cruddy-panel .cp-filters input,
+      #cruddy-panel .cp-filters select {
+        width: 100%;
+      }
+      
+      #cruddy-panel .cp-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+      
+      #cruddy-panel .cp-table-wrap {
+        font-size: 12px;
+      }
+      
+      #cruddy-panel th, 
+      #cruddy-panel td {
+        padding: 8px 6px;
+      }
+      
+      #cruddy-panel .cp-actions {
+        flex-direction: column;
+        gap: 4px;
+      }
+      
+      #cruddy-panel .cp-event-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      
+      #cruddy-panel .cp-event-meta {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      #cruddy-panel .cp-attendee-list {
+        gap: 6px;
+      }
+      
+      #cruddy-panel .cp-attendee {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      
+      #cruddy-panel .cp-leaderboard-controls {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      #cruddy-panel .cp-control-group {
+        width: 100%;
+      }
+      
+      #cruddy-panel .cp-control-group select,
+      #cruddy-panel .cp-control-group input {
+        width: 100%;
+      }
+      
+      #cruddy-panel .cp-leader-row {
+        flex-wrap: wrap;
+        padding: 10px;
+        gap: 8px;
+      }
+      
+      #cruddy-panel .cp-leader-rank {
+        font-size: 16px;
+        width: 30px;
+      }
+      
+      #cruddy-panel .cp-leader-name {
+        font-size: 14px;
+        flex: 1;
+        min-width: 80px;
+      }
+      
+      #cruddy-panel .cp-leader-bar {
+        flex: 0 0 100%;
+        order: 3;
+        height: 6px;
+      }
+      
+      #cruddy-panel .cp-leader-count {
+        font-size: 14px;
+      }
+      
+      #cruddy-panel .cp-leaderboard-summary {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      #cruddy-panel .cp-stat-value {
+        font-size: 24px;
+      }
+      
+      #cruddy-panel .cp-modal {
+        min-width: auto;
+        width: 90%;
+        max-width: 400px;
+        padding: 20px;
+      }
+      
+      #cruddy-panel .cp-form {
+        max-width: 100%;
+      }
+      
+      #cruddy-panel .cp-pagination {
+        flex-wrap: wrap;
+      }
+    }
   `;
 
   const HTML = `

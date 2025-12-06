@@ -477,18 +477,114 @@
       gap: 8px;
     }
 
-    /* Responsive */
+    /* Responsive - Tablet */
     @media (max-width: 1200px) {
       .im-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: 220px 1fr;
       }
-      .im-sidebar, .im-properties {
-        flex-direction: row;
+      .im-properties {
+        display: none;
+      }
+    }
+
+    /* Responsive - Mobile */
+    @media (max-width: 768px) {
+      #infographic-root {
+        width: calc(100vw - 20px) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+      }
+      
+      #infographic-maker {
+        padding: 12px;
+        height: auto;
+        min-height: auto;
+      }
+      
+      #infographic-maker h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+      
+      .im-container {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        height: auto;
+      }
+      
+      .im-sidebar {
+        order: 1;
+        height: auto;
+        max-height: none;
+      }
+      
+      .im-canvas-area {
+        order: 2;
+        height: auto;
+      }
+      
+      .im-canvas-wrap {
+        min-height: 300px;
+        height: 50vh;
+      }
+      
+      .im-canvas-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
+      }
+      
+      .im-toolbar-group {
+        flex: 1;
+        min-width: 100px;
+      }
+      
+      .im-toolbar-divider {
+        display: none;
+      }
+      
+      .im-tools {
+        grid-template-columns: repeat(6, 1fr);
+      }
+      
+      .im-tool-btn {
+        padding: 8px 4px;
+        font-size: 10px;
+      }
+      
+      .im-tool-btn .icon {
+        font-size: 16px;
+      }
+      
+      .im-presets {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .im-preset-btn {
+        padding: 6px;
+        font-size: 10px;
+      }
+      
+      .im-panel-header {
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+      
+      .im-panel-content {
+        padding: 8px;
+      }
+      
+      .im-properties {
+        display: none;
+      }
+      
+      .im-export-btns {
         flex-wrap: wrap;
       }
-      .im-panel {
-        flex: 1;
-        min-width: 200px;
+      
+      .im-btn {
+        padding: 8px 12px;
+        font-size: 12px;
       }
     }
   `;
