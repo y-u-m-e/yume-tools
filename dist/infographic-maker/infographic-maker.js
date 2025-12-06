@@ -1167,8 +1167,9 @@
                 <button class="im-preset-btn" data-preset="osrs-border-cyan">Cyan Border</button>
                 <button class="im-preset-btn" data-preset="osrs-border-pink">Pink Border</button>
               </div>
-              <div style="margin-top: 10px;">
-                <button class="im-btn im-btn-secondary" id="im-skill-icons-btn" style="width: 100%;">⚔️ Skill Icons</button>
+              <div style="margin-top: 10px; display: flex; gap: 6px;">
+                <button class="im-btn im-btn-secondary" id="im-skill-icons-btn" style="flex: 1;">⚔️ Skills</button>
+                <button class="im-btn im-btn-secondary" id="im-prayer-icons-btn" style="flex: 1;">🙏 Prayers</button>
               </div>
             </div>
           </div>
@@ -1279,6 +1280,19 @@
           </div>
           <div class="im-modal-content">
             <div class="im-skill-grid" id="im-skill-grid"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Prayer Icons Modal -->
+      <div class="im-modal-overlay" id="im-prayer-modal" style="display:none;">
+        <div class="im-modal">
+          <div class="im-modal-header">
+            <h3>🙏 Prayer Icons</h3>
+            <button class="im-modal-close" id="im-prayer-modal-close">✕</button>
+          </div>
+          <div class="im-modal-content">
+            <div class="im-skill-grid" id="im-prayer-grid"></div>
           </div>
         </div>
       </div>
@@ -2089,6 +2103,91 @@
         skillModal.style.display = 'none';
       } catch (err) {
         console.error('Failed to load skill icon:', err);
+      }
+    };
+
+    // Prayer icons modal
+    const prayerModal = rootEl.querySelector('#im-prayer-modal');
+    const prayerGrid = rootEl.querySelector('#im-prayer-grid');
+    const prayerIconsBtn = rootEl.querySelector('#im-prayer-icons-btn');
+    const prayerModalClose = rootEl.querySelector('#im-prayer-modal-close');
+    
+    const PRAYER_ICONS = [
+      { name: 'Thick Skin', file: 'Thick_Skin' },
+      { name: 'Steel Skin', file: 'Steel_Skin' },
+      { name: 'Ultimate Strength', file: 'Ultimate_Strength' },
+      { name: 'Incredible Reflexes', file: 'Incredible_Reflexes' },
+      { name: 'Sharp Eye', file: 'Sharp_Eye' },
+      { name: 'Eagle Eye', file: 'Eagle_Eye' },
+      { name: 'Mystic Lore', file: 'Mystic_Lore' },
+      { name: 'Mystic Might', file: 'Mystic_Might' },
+      { name: 'Mystic Vigour', file: 'Mystic_Vigour' },
+      { name: 'Rapid Heal', file: 'Rapid_Heal' },
+      { name: 'Protect Item', file: 'Protect_Item' },
+      { name: 'Protect Missiles', file: 'Protect_from_Missiles' },
+      { name: 'Protect Magic', file: 'Protect_from_Magic_overhead' },
+      { name: 'Protect Melee', file: 'Protect_from_Melee_overhead' },
+      { name: 'Retribution', file: 'Retribution' },
+      { name: 'Redemption', file: 'Redemption' },
+      { name: 'Preserve', file: 'Preserve' },
+      { name: 'Chivalry', file: 'Chivalry' },
+      { name: 'Piety', file: 'Piety' },
+      { name: 'Rigour', file: 'Rigour' },
+      { name: 'Augury', file: 'Augury' }
+    ];
+    
+    // Populate prayer grid
+    prayerGrid.innerHTML = PRAYER_ICONS.map(prayer => `
+      <div class="im-skill-item" data-prayer="${prayer.file}">
+        <img src="https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Prayer_Icons/${prayer.file}.png" alt="${prayer.name}">
+        <span>${prayer.name}</span>
+      </div>
+    `).join('');
+    
+    // Open modal
+    prayerIconsBtn.onclick = () => {
+      prayerModal.style.display = 'flex';
+    };
+    
+    // Close modal
+    prayerModalClose.onclick = () => {
+      prayerModal.style.display = 'none';
+    };
+    
+    // Close on overlay click
+    prayerModal.onclick = (e) => {
+      if (e.target === prayerModal) {
+        prayerModal.style.display = 'none';
+      }
+    };
+    
+    // Handle prayer selection
+    prayerGrid.onclick = async (e) => {
+      const prayerItem = e.target.closest('.im-skill-item');
+      if (!prayerItem) return;
+      
+      const iconName = prayerItem.dataset.prayer;
+      
+      try {
+        const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Prayer_Icons/${iconName}.png`;
+        const img = await loadImage(iconUrl);
+        const layer = createLayer(LAYER_TYPES.IMAGE, {
+          name: iconName.replace(/_/g, ' '),
+          image: img,
+          src: iconUrl,
+          width: img.width,
+          height: img.height
+        });
+        layers.push(layer);
+        selectedLayerIdx = layers.length - 1;
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+        
+        // Close modal after selection
+        prayerModal.style.display = 'none';
+      } catch (err) {
+        console.error('Failed to load prayer icon:', err);
       }
     };
 
