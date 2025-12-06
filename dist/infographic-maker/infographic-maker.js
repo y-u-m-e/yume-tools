@@ -2189,6 +2189,48 @@
       startLayer = null;
     };
 
+    // Paste image from clipboard
+    document.addEventListener('paste', async (e) => {
+      // Only handle paste when infographic maker is in focus/visible
+      if (!rootEl.contains(document.activeElement) && document.activeElement !== document.body) {
+        return;
+      }
+      
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const blob = item.getAsFile();
+          if (!blob) continue;
+          
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            try {
+              const img = await loadImage(event.target.result);
+              const layer = createLayer(LAYER_TYPES.IMAGE, {
+                name: 'Pasted Image',
+                image: img,
+                src: event.target.result,
+                width: img.width,
+                height: img.height
+              });
+              layers.push(layer);
+              selectedLayerIdx = layers.length - 1;
+              render();
+              renderLayersList(rootEl);
+              renderProperties(rootEl);
+            } catch (err) {
+              console.error('Failed to load pasted image:', err);
+            }
+          };
+          reader.readAsDataURL(blob);
+          break; // Only handle first image
+        }
+      }
+    });
+
     // Layer list clicks
     rootEl.querySelector('#im-layers').onclick = (e) => {
       const layerEl = e.target.closest('.im-layer');
