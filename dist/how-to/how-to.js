@@ -37,32 +37,32 @@
     #how-to-widget * { box-sizing: border-box; }
 
     #how-to-widget h2 {
-      margin: 0 0 30px 0;
+      margin: 0 0 25px 0;
       color: #5eead4;
       text-align: center;
       font-weight: 600;
-      font-size: 28px;
+      font-size: 26px;
     }
 
     .ht-tabs {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 25px;
       justify-content: center;
-      flex-wrap: wrap;
     }
 
     .ht-tab {
-      padding: 12px 24px;
+      padding: 10px 18px;
       background: rgba(15, 40, 50, 0.5);
       border: 1px solid rgba(94, 234, 212, 0.2);
-      border-radius: 12px;
+      border-radius: 10px;
       color: rgba(255, 255, 255, 0.6);
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       transition: all 0.3s;
       font-family: inherit;
+      white-space: nowrap;
     }
 
     .ht-tab:hover {
@@ -93,40 +93,53 @@
     .ht-section {
       background: rgba(15, 40, 50, 0.4);
       border-radius: 16px;
-      padding: 25px;
-      margin-bottom: 20px;
+      padding: 22px 25px;
+      margin-bottom: 16px;
       border: 1px solid rgba(94, 234, 212, 0.1);
     }
 
     .ht-section h3 {
       color: #5eead4;
-      font-size: 20px;
-      margin: 0 0 15px 0;
+      font-size: 18px;
+      margin: 0 0 12px 0;
       font-weight: 600;
     }
 
     .ht-section h4 {
-      color: #fff;
-      font-size: 16px;
-      margin: 20px 0 10px 0;
-      font-weight: 500;
+      color: #5eead4;
+      font-size: 15px;
+      margin: 0 0 12px 0;
+      font-weight: 600;
     }
 
     .ht-section p {
-      color: rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.75);
       line-height: 1.7;
-      margin: 0 0 15px 0;
+      margin: 0;
+      text-align: left;
     }
 
     .ht-section ul {
-      color: rgba(255, 255, 255, 0.7);
-      line-height: 1.8;
-      margin: 0 0 15px 0;
-      padding-left: 20px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.7;
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
     }
 
     .ht-section li {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      padding-left: 20px;
+      position: relative;
+      text-align: left;
+    }
+
+    .ht-section li::before {
+      content: '•';
+      color: #5eead4;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
     }
 
     .ht-section li strong {
@@ -136,9 +149,10 @@
     .ht-tip {
       background: rgba(94, 234, 212, 0.1);
       border-left: 3px solid #5eead4;
-      padding: 15px 20px;
-      border-radius: 0 12px 12px 0;
-      margin: 15px 0;
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      margin-top: 15px;
+      text-align: left;
     }
 
     .ht-tip strong {
@@ -147,10 +161,10 @@
 
     .ht-code {
       background: rgba(0, 0, 0, 0.3);
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 4px;
       font-family: 'Consolas', 'Monaco', monospace;
-      font-size: 13px;
+      font-size: 12px;
       color: #ffd700;
     }
 
@@ -159,19 +173,20 @@
     }
 
     .ht-step {
-      position: relative;
-      padding-left: 50px;
-      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 16px;
     }
 
-    .ht-step::before {
-      counter-increment: step;
-      content: counter(step);
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 32px;
-      height: 32px;
+    .ht-step:last-child {
+      margin-bottom: 0;
+    }
+
+    .ht-step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
       background: linear-gradient(135deg, #2dd4bf 0%, #5eead4 100%);
       border-radius: 50%;
       display: flex;
@@ -179,47 +194,96 @@
       justify-content: center;
       font-weight: 700;
       color: #0f2935;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .ht-step-content {
+      flex: 1;
+      text-align: left;
     }
 
     .ht-step-title {
       color: #fff;
       font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 8px;
+      font-size: 15px;
+      margin-bottom: 4px;
     }
 
     .ht-step-desc {
       color: rgba(255, 255, 255, 0.6);
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .ht-color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .ht-color-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .ht-color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .ht-color-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .ht-color-name {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .ht-color-hex {
+      color: rgba(255, 255, 255, 0.5);
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 11px;
     }
 
     @media (max-width: 600px) {
       #how-to-widget {
-        padding: 20px;
+        padding: 20px 15px;
         margin: 10px;
       }
 
       #how-to-widget h2 {
-        font-size: 22px;
+        font-size: 20px;
       }
 
       .ht-tabs {
         gap: 6px;
+        flex-wrap: wrap;
       }
 
       .ht-tab {
-        padding: 10px 16px;
-        font-size: 12px;
+        padding: 8px 12px;
+        font-size: 11px;
       }
 
       .ht-section {
-        padding: 20px;
+        padding: 18px;
       }
 
       .ht-section h3 {
-        font-size: 18px;
+        font-size: 16px;
+      }
+
+      .ht-color-grid {
+        grid-template-columns: 1fr;
       }
     }
   `;
@@ -230,24 +294,33 @@
       title: 'Mention Maker',
       content: `
         <div class="ht-section">
-          <h3>💬 What is the Mention Maker?</h3>
+          <h3>💬 What is it?</h3>
           <p>The Mention Maker helps you quickly create Discord mention strings for multiple users at once. Perfect for pinging clan members for events!</p>
         </div>
 
         <div class="ht-section">
-          <h3>📝 How to Use</h3>
+          <h3>📝 Steps</h3>
           <div class="ht-steps">
             <div class="ht-step">
-              <div class="ht-step-title">Enter Player Names</div>
-              <div class="ht-step-desc">Type or paste player names in the text area. You can use one name per line, or separate with commas.</div>
+              <div class="ht-step-num">1</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Enter Player Names</div>
+                <div class="ht-step-desc">Type or paste player names in the text area. One name per line, or separate with commas.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Click Generate</div>
-              <div class="ht-step-desc">The tool will look up each player's Discord ID and create mention strings.</div>
+              <div class="ht-step-num">2</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Click Generate</div>
+                <div class="ht-step-desc">The tool will look up each player's Discord ID and create mention strings.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Copy & Paste</div>
-              <div class="ht-step-desc">Copy the generated mentions and paste them directly into Discord!</div>
+              <div class="ht-step-num">3</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Copy & Paste</div>
+                <div class="ht-step-desc">Copy the generated mentions and paste them directly into Discord!</div>
+              </div>
             </div>
           </div>
         </div>
@@ -255,9 +328,9 @@
         <div class="ht-section">
           <h4>💡 Tips</h4>
           <ul>
-            <li>Names are <strong>case-insensitive</strong> - "Y U M E" and "y u m e" will both work</li>
-            <li>If a player isn't found, they'll be shown with their RSN instead of a mention</li>
-            <li>You can paste directly from a RuneLite screenshot or clan list</li>
+            <li>Names are <strong>case-insensitive</strong> — "Y U M E" and "y u m e" both work</li>
+            <li>If a player isn't found, they'll show their RSN instead</li>
+            <li>You can paste directly from RuneLite or clan list</li>
           </ul>
         </div>
       `
@@ -267,28 +340,40 @@
       title: 'Event Log Parser',
       content: `
         <div class="ht-section">
-          <h3>📋 What is the Event Log Parser?</h3>
-          <p>The Event Log Parser extracts player names from clan event screenshots or chat logs. It's designed to work with RuneLite's clan chat and loot tracker output.</p>
+          <h3>📋 What is it?</h3>
+          <p>The Event Log Parser extracts player names from clan event screenshots or chat logs. Works with RuneLite's clan chat and loot tracker output.</p>
         </div>
 
         <div class="ht-section">
-          <h3>📝 How to Use</h3>
+          <h3>📝 Steps</h3>
           <div class="ht-steps">
             <div class="ht-step">
-              <div class="ht-step-title">Paste Your Log</div>
-              <div class="ht-step-desc">Copy the text from your clan chat, RuneLite loot tracker, or any event log and paste it into the text area.</div>
+              <div class="ht-step-num">1</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Paste Your Log</div>
+                <div class="ht-step-desc">Copy the text from clan chat, RuneLite loot tracker, or any event log and paste it in.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Select Event Type</div>
-              <div class="ht-step-desc">Choose the type of event (PvP, PvM, Skilling, etc.) to help categorize the data.</div>
+              <div class="ht-step-num">2</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Fill Event Details</div>
+                <div class="ht-step-desc">Add the event name, time, and any notes for the formatted output.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Parse & Review</div>
-              <div class="ht-step-desc">The parser will extract player names. Review the list and make any corrections.</div>
+              <div class="ht-step-num">3</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Extract Names</div>
+                <div class="ht-step-desc">Click Extract to pull player names from the log automatically.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Export</div>
-              <div class="ht-step-desc">Export the cleaned list for use in other tools or for attendance tracking.</div>
+              <div class="ht-step-num">4</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Copy Output</div>
+                <div class="ht-step-desc">Get the formatted attendance list ready for tracking.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -297,12 +382,11 @@
           <h4>💡 Supported Formats</h4>
           <ul>
             <li><strong>Clan Chat:</strong> Parses standard OSRS clan chat format</li>
-            <li><strong>RuneLite Loot Tracker:</strong> Extracts names from loot splits</li>
+            <li><strong>Loot Tracker:</strong> Extracts names from RuneLite splits</li>
             <li><strong>Plain Lists:</strong> One name per line or comma-separated</li>
           </ul>
-          
           <div class="ht-tip">
-            <strong>Pro Tip:</strong> For best results, copy directly from the RuneLite client rather than taking screenshots.
+            <strong>Tip:</strong> Copy directly from RuneLite rather than taking screenshots for best results.
           </div>
         </div>
       `
@@ -312,32 +396,40 @@
       title: 'Infographic Maker',
       content: `
         <div class="ht-section">
-          <h3>🎨 What is the Infographic Maker?</h3>
+          <h3>🎨 What is it?</h3>
           <p>Create stunning OSRS-style infographics with the drag-and-drop editor. Perfect for event announcements, guides, and clan posts!</p>
         </div>
 
         <div class="ht-section">
-          <h3>📝 How to Use</h3>
+          <h3>📝 Steps</h3>
           <div class="ht-steps">
             <div class="ht-step">
-              <div class="ht-step-title">Set Canvas Size</div>
-              <div class="ht-step-desc">Choose your canvas dimensions. Common sizes: 800x600 for Discord embeds, 1920x1080 for full banners.</div>
+              <div class="ht-step-num">1</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Set Canvas Size</div>
+                <div class="ht-step-desc">Choose dimensions from the dropdown. 800×600 for Discord embeds, 1920×1080 for banners.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Add Layers</div>
-              <div class="ht-step-desc">Add text, shapes, or images using the toolbar buttons. Each element is a separate layer.</div>
+              <div class="ht-step-num">2</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Add Layers</div>
+                <div class="ht-step-desc">Use toolbar buttons to add text, shapes, or images. Each element is a separate layer.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Customize</div>
-              <div class="ht-step-desc">Click any layer to select it. Use the properties panel to change colors, fonts, sizes, and positions.</div>
+              <div class="ht-step-num">3</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Customize</div>
+                <div class="ht-step-desc">Click any layer to select it. Use properties panel to change colors, fonts, sizes.</div>
+              </div>
             </div>
             <div class="ht-step">
-              <div class="ht-step-title">Arrange Layers</div>
-              <div class="ht-step-desc">Drag layers in the layer list to reorder them. Top layers appear in front.</div>
-            </div>
-            <div class="ht-step">
-              <div class="ht-step-title">Export</div>
-              <div class="ht-step-desc">Click "Download PNG" to save your creation!</div>
+              <div class="ht-step-num">4</div>
+              <div class="ht-step-content">
+                <div class="ht-step-title">Arrange & Export</div>
+                <div class="ht-step-desc">Reorder layers as needed, then click "Export PNG" to save your creation!</div>
+              </div>
             </div>
           </div>
         </div>
@@ -345,26 +437,62 @@
         <div class="ht-section">
           <h4>🎯 Features</h4>
           <ul>
-            <li><strong>Text Layers:</strong> RuneScape fonts included! Use "RuneScape UF" for authentic styling</li>
-            <li><strong>Shapes:</strong> Rectangles, circles, and lines with customizable colors and borders</li>
-            <li><strong>Images:</strong> Upload your own images or use OSRS item icons</li>
-            <li><strong>Undo/Redo:</strong> Press <span class="ht-code">Ctrl+Z</span> to undo, <span class="ht-code">Ctrl+Y</span> to redo</li>
+            <li><strong>Text:</strong> RuneScape fonts included! Use "RuneScape UF" for authentic styling</li>
+            <li><strong>Shapes:</strong> Rectangles, circles, and lines with customizable colors</li>
+            <li><strong>Icons:</strong> Built-in skill and prayer icons from OSRS</li>
+            <li><strong>Undo/Redo:</strong> Press <span class="ht-code">Ctrl+Z</span> / <span class="ht-code">Ctrl+Y</span></li>
           </ul>
-
           <div class="ht-tip">
-            <strong>Pro Tip:</strong> Hold Shift while dragging to constrain movement to horizontal or vertical!
+            <strong>Tip:</strong> Hold Shift while dragging to constrain to horizontal or vertical movement.
           </div>
         </div>
 
         <div class="ht-section">
-          <h4>🎨 OSRS Color Palette</h4>
-          <ul>
-            <li><strong>Gold:</strong> <span class="ht-code">#FFD700</span> - Classic OSRS gold text</li>
-            <li><strong>Green:</strong> <span class="ht-code">#00FF00</span> - Public chat green</li>
-            <li><strong>Cyan:</strong> <span class="ht-code">#00FFFF</span> - Clan chat cyan</li>
-            <li><strong>Orange:</strong> <span class="ht-code">#FF981F</span> - OSRS orange</li>
-            <li><strong>Red:</strong> <span class="ht-code">#FF0000</span> - Warning/PK red</li>
-          </ul>
+          <h4>🎨 OSRS Colors</h4>
+          <div class="ht-color-grid">
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #FFD700;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Gold</div>
+                <div class="ht-color-hex">#FFD700</div>
+              </div>
+            </div>
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #00FF00;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Green</div>
+                <div class="ht-color-hex">#00FF00</div>
+              </div>
+            </div>
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #00FFFF;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Cyan</div>
+                <div class="ht-color-hex">#00FFFF</div>
+              </div>
+            </div>
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #FF981F;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Orange</div>
+                <div class="ht-color-hex">#FF981F</div>
+              </div>
+            </div>
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #FF0000;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Red</div>
+                <div class="ht-color-hex">#FF0000</div>
+              </div>
+            </div>
+            <div class="ht-color-item">
+              <div class="ht-color-swatch" style="background: #9F00FF;"></div>
+              <div class="ht-color-info">
+                <div class="ht-color-name">Purple</div>
+                <div class="ht-color-hex">#9F00FF</div>
+              </div>
+            </div>
+          </div>
         </div>
       `
     }
@@ -384,9 +512,9 @@
         <h2>📖 How To Use</h2>
         
         <div class="ht-tabs">
-          <button class="ht-tab active" data-tab="mentions">💬 Mention Maker</button>
-          <button class="ht-tab" data-tab="eventlog">📋 Event Log Parser</button>
-          <button class="ht-tab" data-tab="infographic">🎨 Infographic Maker</button>
+          <button class="ht-tab active" data-tab="mentions">💬 Mentions</button>
+          <button class="ht-tab" data-tab="eventlog">📋 Event Logs</button>
+          <button class="ht-tab" data-tab="infographic">🎨 Infographic</button>
         </div>
 
         <div class="ht-panel active" data-panel="mentions">
@@ -443,4 +571,3 @@
 
   return { mount };
 });
-
