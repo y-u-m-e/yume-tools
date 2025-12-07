@@ -106,8 +106,8 @@
     { id: 'msg-maker', hash: '#msg-maker', icon: '💬', label: 'Mentions' },
     { id: 'log-maker', hash: '#log-maker', icon: '📋', label: 'Event Logs' },
     { id: 'infographic-maker', hash: '#infographic-maker', icon: '🎨', label: 'Infographic Maker' },
-    { id: 'docs', url: 'https://api.itai.gg/docs/', icon: '📚', label: 'Docs', external: true },
-    { id: 'cruddy-panel', hash: '#cruddy-panel', icon: '🗃️', label: 'Cruddy Panel' }
+    { id: 'docs', url: 'https://api.itai.gg/docs/', icon: '📚', label: 'Docs', external: true }
+    // Cruddy Panel moved to emuy.gg
   ];
 
   function injectStyles(doc) {
