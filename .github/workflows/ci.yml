@@ -1,0 +1,121 @@
+# CI/CD for Yume Tools Widgets
+# 
+# Staging: api-staging.itai.gg (always serves latest from main branch)
+# Production: api.itai.gg (serves specific SHA commits)
+#
+# Flow:
+# 1. Push to main → Staging automatically updates (uses "main" ref)
+# 2. Test on staging
+# 3. Manually trigger "promote-to-production" to update production SHAs
+
+name: Widget CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dist/**'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'test-staging'
+        type: choice
+        options:
+          - test-staging
+          - promote-to-production
+
+jobs:
+  # Notify that staging is updated (staging uses main branch automatically)
+  staging-updated:
+    name: Staging Auto-Updated
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Get commit info
+        run: |
+          echo "## 🚀 Staging Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "Short SHA: \`$(echo ${{ github.sha }} | cut -c1-7)\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- **Staging API:** https://api-staging.itai.gg" >> $GITHUB_STEP_SUMMARY
+          echo "- **Nav Bar:** https://api-staging.itai.gg/cdn/nav-bar.js" >> $GITHUB_STEP_SUMMARY
+          echo "- **How To:** https://api-staging.itai.gg/cdn/how-to.js" >> $GITHUB_STEP_SUMMARY
+          echo "- **Infographic Maker:** https://api-staging.itai.gg/cdn/infographic-maker.js" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mention Widget:** https://api-staging.itai.gg/cdn/mention-widget.js" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event Parser:** https://api-staging.itai.gg/cdn/event-parser-widget.js" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cruddy Panel:** https://api-staging.itai.gg/cdn/cruddy-panel.js" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Test the widgets on staging" >> $GITHUB_STEP_SUMMARY
+          echo "2. If everything works, run the **promote-to-production** workflow" >> $GITHUB_STEP_SUMMARY
+
+  # Promote to production - updates SHAs in yume-api
+  promote-to-production:
+    name: Promote to Production
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'promote-to-production'
+    steps:
+      - name: Checkout yume-tools
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current SHA
+        id: sha
+        run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Checkout yume-api
+        uses: actions/checkout@v4
+        with:
+          repository: y-u-m-e/yume-api
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          path: yume-api
+
+      - name: Update production SHAs
+        run: |
+          cd yume-api
+          SHA="${{ steps.sha.outputs.short }}"
+          
+          # Update all widget SHAs in wrangler.jsonc
+          sed -i "s/\"SHA_NAV_BAR\": \"[^\"]*\"/\"SHA_NAV_BAR\": \"$SHA\"/" wrangler.jsonc
+          sed -i "s/\"SHA_HOW_TO\": \"[^\"]*\"/\"SHA_HOW_TO\": \"$SHA\"/" wrangler.jsonc
+          sed -i "s/\"SHA_INFOGRAPHIC_MAKER\": \"[^\"]*\"/\"SHA_INFOGRAPHIC_MAKER\": \"$SHA\"/" wrangler.jsonc
+          sed -i "s/\"SHA_CRUDDY_PANEL\": \"[^\"]*\"/\"SHA_CRUDDY_PANEL\": \"$SHA\"/" wrangler.jsonc
+          sed -i "s/\"SHA_EVENT_PARSER\": \"[^\"]*\"/\"SHA_EVENT_PARSER\": \"$SHA\"/" wrangler.jsonc
+          sed -i "s/\"SHA_MENTION_WIDGET\": \"[^\"]*\"/\"SHA_MENTION_WIDGET\": \"$SHA\"/" wrangler.jsonc
+          
+          echo "Updated all SHAs to: $SHA"
+          cat wrangler.jsonc | grep SHA_
+
+      - name: Commit and push
+        run: |
+          cd yume-api
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add wrangler.jsonc
+          git commit -m "Promote widgets to production (SHA: ${{ steps.sha.outputs.short }})"
+          git push
+
+      - name: Deploy Worker
+        run: |
+          cd yume-api
+          npm install
+          npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## ✅ Production Updated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All widgets promoted to production with SHA: \`${{ steps.sha.outputs.short }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Production URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- https://api.itai.gg/cdn/nav-bar.js" >> $GITHUB_STEP_SUMMARY
+          echo "- https://api.itai.gg/cdn/how-to.js" >> $GITHUB_STEP_SUMMARY
+          echo "- https://api.itai.gg/cdn/infographic-maker.js" >> $GITHUB_STEP_SUMMARY
+
