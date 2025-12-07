@@ -1261,6 +1261,11 @@
                 <span style="font-size: 11px;">None</span>
               </label>
             </div>
+            <div class="im-toolbar-divider"></div>
+            <div class="im-toolbar-group">
+              <button class="im-btn im-btn-secondary im-btn-sm" id="im-undo-btn" title="Undo (Ctrl+Z)" disabled style="opacity:0.5;">↩ Undo</button>
+              <button class="im-btn im-btn-secondary im-btn-sm" id="im-redo-btn" title="Redo (Ctrl+Y)" disabled style="opacity:0.5;">↪ Redo</button>
+            </div>
             <div style="flex:1;"></div>
             <div class="im-export-btns">
               <button class="im-btn im-btn-secondary" id="im-clear-btn">🗑 Clear</button>
@@ -1355,6 +1360,118 @@
   let zoom = 1;
   let bgColor = '#ffffff';
   let bgTransparent = false;
+  
+  // Undo/Redo stacks
+  let undoStack = [];
+  let redoStack = [];
+  const MAX_HISTORY = 50;
+  
+  // Deep clone layers for history (preserving image references)
+  function cloneLayers(layersArr) {
+    return layersArr.map(layer => {
+      const cloned = { ...layer };
+      // Keep image reference (don't clone the actual image object)
+      return cloned;
+    });
+  }
+  
+  // Save current state to undo stack
+  function saveState() {
+    undoStack.push({
+      layers: cloneLayers(layers),
+      selectedLayerIdx,
+      bgColor,
+      bgTransparent
+    });
+    // Limit stack size
+    if (undoStack.length > MAX_HISTORY) {
+      undoStack.shift();
+    }
+    // Clear redo stack when new action is performed
+    redoStack = [];
+  }
+  
+  // Undo last action
+  function undo(rootEl) {
+    if (undoStack.length === 0) return false;
+    
+    // Save current state to redo stack
+    redoStack.push({
+      layers: cloneLayers(layers),
+      selectedLayerIdx,
+      bgColor,
+      bgTransparent
+    });
+    
+    // Restore previous state
+    const prevState = undoStack.pop();
+    layers = prevState.layers;
+    selectedLayerIdx = prevState.selectedLayerIdx;
+    bgColor = prevState.bgColor;
+    bgTransparent = prevState.bgTransparent;
+    
+    // Update UI
+    if (rootEl) {
+      const bgColorInput = rootEl.querySelector('#im-bg-color');
+      const bgTransparentCheckbox = rootEl.querySelector('#im-bg-transparent');
+      if (bgColorInput) bgColorInput.value = bgColor;
+      if (bgTransparentCheckbox) {
+        bgTransparentCheckbox.checked = bgTransparent;
+        bgColorInput.disabled = bgTransparent;
+        bgColorInput.style.opacity = bgTransparent ? '0.5' : '1';
+      }
+    }
+    
+    return true;
+  }
+  
+  // Redo last undone action
+  function redo(rootEl) {
+    if (redoStack.length === 0) return false;
+    
+    // Save current state to undo stack
+    undoStack.push({
+      layers: cloneLayers(layers),
+      selectedLayerIdx,
+      bgColor,
+      bgTransparent
+    });
+    
+    // Restore next state
+    const nextState = redoStack.pop();
+    layers = nextState.layers;
+    selectedLayerIdx = nextState.selectedLayerIdx;
+    bgColor = nextState.bgColor;
+    bgTransparent = nextState.bgTransparent;
+    
+    // Update UI
+    if (rootEl) {
+      const bgColorInput = rootEl.querySelector('#im-bg-color');
+      const bgTransparentCheckbox = rootEl.querySelector('#im-bg-transparent');
+      if (bgColorInput) bgColorInput.value = bgColor;
+      if (bgTransparentCheckbox) {
+        bgTransparentCheckbox.checked = bgTransparent;
+        bgColorInput.disabled = bgTransparent;
+        bgColorInput.style.opacity = bgTransparent ? '0.5' : '1';
+      }
+    }
+    
+    return true;
+  }
+  
+  // Update undo/redo button states
+  function updateUndoRedoButtons(rootEl) {
+    const undoBtn = rootEl.querySelector('#im-undo-btn');
+    const redoBtn = rootEl.querySelector('#im-redo-btn');
+    if (undoBtn) {
+      undoBtn.disabled = undoStack.length === 0;
+      undoBtn.style.opacity = undoStack.length === 0 ? '0.5' : '1';
+    }
+    if (redoBtn) {
+      redoBtn.disabled = redoStack.length === 0;
+      redoBtn.style.opacity = redoStack.length === 0 ? '0.5' : '1';
+    }
+  }
 
   // Layer types
   const LAYER_TYPES = {
@@ -1884,7 +2001,20 @@
     container.innerHTML = html;
 
     // Wire up property changes
+    let propStateSaved = false;
     container.querySelectorAll('[data-prop]').forEach(input => {
+      // Save state once when starting to edit
+      input.addEventListener('focus', () => {
+        if (!propStateSaved) {
+          saveState();
+          propStateSaved = true;
+          const imRoot = rootEl.closest('#infographic-maker');
+          if (imRoot) updateUndoRedoButtons(imRoot);
+        }
+      });
+      input.addEventListener('blur', () => {
+        propStateSaved = false;
+      });
       input.addEventListener('input', (e) => {
         const prop = e.target.dataset.prop;
         let value = e.target.value;
@@ -1933,11 +2063,14 @@
     const deleteBtn = container.querySelector('#im-delete-layer');
     if (deleteBtn) {
       deleteBtn.onclick = () => {
+        saveState();
         layers.splice(selectedLayerIdx, 1);
         selectedLayerIdx = -1;
         render();
-        renderLayersList(rootEl.closest('#infographic-maker'));
-        renderProperties(rootEl.closest('#infographic-maker'));
+        const imRoot = rootEl.closest('#infographic-maker');
+        renderLayersList(imRoot);
+        renderProperties(imRoot);
+        updateUndoRedoButtons(imRoot);
       };
     }
   }
@@ -2044,11 +2177,13 @@
     }
 
     if (layer) {
+      saveState();
       layers.push(layer);
       selectedLayerIdx = layers.length - 1;
       render();
       renderLayersList(rootEl);
       renderProperties(rootEl);
+      updateUndoRedoButtons(rootEl);
     }
   }
 
@@ -2161,6 +2296,7 @@
       try {
         const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Skill_Icons/${iconName}.png`;
         const img = await loadImage(iconUrl);
+        saveState();
         const layer = createLayer(LAYER_TYPES.IMAGE, {
           name: iconName.replace('_icon', '').replace('_', ' '),
           image: img,
@@ -2173,6 +2309,7 @@
         render();
         renderLayersList(rootEl);
         renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
         
         // Close modal after selection
         skillModal.style.display = 'none';
@@ -2246,6 +2383,7 @@
       try {
         const iconUrl = `https://cdn.jsdelivr.net/gh/y-u-m-e/yume-tools@main/dist/infographic-maker/assets/presets/Prayer_Icons/${iconName}.png`;
         const img = await loadImage(iconUrl);
+        saveState();
         const layer = createLayer(LAYER_TYPES.IMAGE, {
           name: iconName.replace(/_/g, ' '),
           image: img,
@@ -2258,6 +2396,7 @@
         render();
         renderLayersList(rootEl);
         renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
         
         // Close modal after selection
         prayerModal.style.display = 'none';
@@ -2326,16 +2465,24 @@
     const bgColorInput = rootEl.querySelector('#im-bg-color');
     const bgTransparentCheckbox = rootEl.querySelector('#im-bg-transparent');
     
+    // Save state on first change (focus), not on every input
+    bgColorInput.onfocus = () => {
+      saveState();
+      updateUndoRedoButtons(rootEl);
+    };
+    
     bgColorInput.oninput = (e) => {
       bgColor = e.target.value;
       render();
     };
     
     bgTransparentCheckbox.onchange = (e) => {
+      saveState();
       bgTransparent = e.target.checked;
       bgColorInput.disabled = bgTransparent;
       bgColorInput.style.opacity = bgTransparent ? '0.5' : '1';
       render();
+      updateUndoRedoButtons(rootEl);
     };
 
     // Scroll wheel zoom
@@ -2397,10 +2544,12 @@
         if (selectedLayerIdx >= 0 && !layers[selectedLayerIdx].locked) {
           const handle = getResizeHandle(x, y, layers[selectedLayerIdx]);
           if (handle) {
+            saveState(); // Save state before resizing
             resizeHandle = handle;
             isDragging = true;
             dragStart = { x, y };
             render();
+            updateUndoRedoButtons(rootEl);
             return;
           }
         }
@@ -2412,9 +2561,11 @@
             selectedLayerIdx = i;
             // Only allow dragging if layer is not locked
             if (!layers[i].locked) {
+              saveState(); // Save state before moving
               isDragging = true;
               dragStart = { x, y };
               dragOffset = { x: x - layers[i].x, y: y - layers[i].y };
+              updateUndoRedoButtons(rootEl);
             }
             break;
           }
@@ -2423,30 +2574,38 @@
         renderLayersList(rootEl);
         renderProperties(rootEl);
       } else if (currentTool === 'rect') {
+        saveState();
         startLayer = createLayer(LAYER_TYPES.RECT, { x, y, width: 0, height: 0 });
         layers.push(startLayer);
         selectedLayerIdx = layers.length - 1;
         isDragging = true;
         dragStart = { x, y };
+        updateUndoRedoButtons(rootEl);
       } else if (currentTool === 'text') {
+        saveState();
         const layer = createLayer(LAYER_TYPES.TEXT, { x, y });
         layers.push(layer);
         selectedLayerIdx = layers.length - 1;
         render();
         renderLayersList(rootEl);
         renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
       } else if (currentTool === 'circle') {
+        saveState();
         startLayer = createLayer(LAYER_TYPES.CIRCLE, { x, y, radius: 0 });
         layers.push(startLayer);
         selectedLayerIdx = layers.length - 1;
         isDragging = true;
         dragStart = { x, y };
+        updateUndoRedoButtons(rootEl);
       } else if (currentTool === 'line') {
+        saveState();
         startLayer = createLayer(LAYER_TYPES.LINE, { x, y, x2: x, y2: y });
         layers.push(startLayer);
         selectedLayerIdx = layers.length - 1;
         isDragging = true;
         dragStart = { x, y };
+        updateUndoRedoButtons(rootEl);
       }
     };
 
@@ -2539,6 +2698,7 @@
           reader.onload = async (event) => {
             try {
               const img = await loadImage(event.target.result);
+              saveState();
               const layer = createLayer(LAYER_TYPES.IMAGE, {
                 name: 'Pasted Image',
                 image: img,
@@ -2551,6 +2711,7 @@
               render();
               renderLayersList(rootEl);
               renderProperties(rootEl);
+              updateUndoRedoButtons(rootEl);
             } catch (err) {
               console.error('Failed to load pasted image:', err);
             }
@@ -2570,12 +2731,17 @@
       const action = e.target.closest('[data-action]')?.dataset.action;
 
       if (action === 'delete') {
+        saveState();
         layers.splice(idx, 1);
         selectedLayerIdx = -1;
+        updateUndoRedoButtons(rootEl);
       } else if (action === 'visible') {
+        saveState();
         layers[idx].visible = !layers[idx].visible;
+        updateUndoRedoButtons(rootEl);
       } else if (action === 'lock') {
         layers[idx].locked = !layers[idx].locked;
+        // Don't save state for lock toggle - it's a minor UI state
       } else {
         selectedLayerIdx = idx;
       }
@@ -2588,19 +2754,23 @@
     // Layer up/down
     rootEl.querySelector('#im-layer-up').onclick = () => {
       if (selectedLayerIdx < layers.length - 1) {
+        saveState();
         [layers[selectedLayerIdx], layers[selectedLayerIdx + 1]] = [layers[selectedLayerIdx + 1], layers[selectedLayerIdx]];
         selectedLayerIdx++;
         render();
         renderLayersList(rootEl);
+        updateUndoRedoButtons(rootEl);
       }
     };
 
     rootEl.querySelector('#im-layer-down').onclick = () => {
       if (selectedLayerIdx > 0) {
+        saveState();
         [layers[selectedLayerIdx], layers[selectedLayerIdx - 1]] = [layers[selectedLayerIdx - 1], layers[selectedLayerIdx]];
         selectedLayerIdx--;
         render();
         renderLayersList(rootEl);
+        updateUndoRedoButtons(rootEl);
       }
     };
 
@@ -2635,6 +2805,7 @@
         reader.onload = async (e) => {
           try {
             const img = await loadImage(e.target.result);
+            saveState();
             const layer = createLayer(LAYER_TYPES.IMAGE, {
               name: file.name,
               image: img,
@@ -2647,6 +2818,7 @@
             render();
             renderLayersList(rootEl);
             renderProperties(rootEl);
+            updateUndoRedoButtons(rootEl);
           } catch (err) {
             console.error('Failed to load image:', err);
           }
@@ -2658,11 +2830,13 @@
     // Clear
     rootEl.querySelector('#im-clear-btn').onclick = () => {
       if (confirm('Clear all layers?')) {
+        saveState();
         layers = [];
         selectedLayerIdx = -1;
         render();
         renderLayersList(rootEl);
         renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
       }
     };
 
@@ -2684,17 +2858,62 @@
       render();
     };
 
+    // Undo/Redo buttons
+    rootEl.querySelector('#im-undo-btn').onclick = () => {
+      if (undo(rootEl)) {
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
+      }
+    };
+    
+    rootEl.querySelector('#im-redo-btn').onclick = () => {
+      if (redo(rootEl)) {
+        render();
+        renderLayersList(rootEl);
+        renderProperties(rootEl);
+        updateUndoRedoButtons(rootEl);
+      }
+    };
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
+      // Undo: Ctrl+Z
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        if (undo(rootEl)) {
+          render();
+          renderLayersList(rootEl);
+          renderProperties(rootEl);
+          updateUndoRedoButtons(rootEl);
+        }
+        return;
+      }
+      
+      // Redo: Ctrl+Y or Ctrl+Shift+Z
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey) || (e.key === 'Z' && e.shiftKey))) {
+        e.preventDefault();
+        if (redo(rootEl)) {
+          render();
+          renderLayersList(rootEl);
+          renderProperties(rootEl);
+          updateUndoRedoButtons(rootEl);
+        }
+        return;
+      }
+      
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (selectedLayerIdx >= 0) {
+          saveState();
           layers.splice(selectedLayerIdx, 1);
           selectedLayerIdx = -1;
           render();
           renderLayersList(rootEl);
           renderProperties(rootEl);
+          updateUndoRedoButtons(rootEl);
         }
       }
 
