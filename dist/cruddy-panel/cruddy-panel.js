@@ -1611,7 +1611,9 @@
       // Show login screen
       host.innerHTML = LOGIN_HTML;
       host.querySelector('#cp-login-btn').onclick = () => {
-        window.location.href = `${apiBase}/auth/login`;
+        // Pass current page as return URL so user comes back here after login
+        const returnUrl = encodeURIComponent(window.location.href);
+        window.location.href = `${apiBase}/auth/login?return_url=${returnUrl}`;
       };
       return;
     }
