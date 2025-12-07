@@ -540,6 +540,20 @@
     copyBtn.addEventListener('click', copyToClipboard);
   }
 
+  // Send heartbeat to API to report widget is loaded
+  function sendHeartbeat() {
+    try {
+      fetch('https://api.emuy.gg/widget/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          widget: 'event-parser',
+          source: window.location.hostname 
+        })
+      }).catch(() => {}); // Silent fail - heartbeat is non-critical
+    } catch (e) {}
+  }
+
   /**
    * mount(selectorOrEl, opts)
    * -------------------------
@@ -558,6 +572,7 @@
     injectStyles(document);
     host.innerHTML = HTML;
     wire(host, opts || {});
+    sendHeartbeat(); // Report widget loaded
   }
 
   return { mount };
