@@ -1,0 +1,49 @@
+name: Update CDN References
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'dist/**'
+  workflow_dispatch:
+
+jobs:
+  update-sha:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout yume-tools
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Checkout yume-api
+        uses: actions/checkout@v4
+        with:
+          repository: y-u-m-e/yume-api
+          token: ${{ secrets.GH_PAT }}
+          path: yume-api
+
+      - name: Update SHA in Worker config
+        run: |
+          cd yume-api
+          # Update the SHAs in wrangler.jsonc
+          sed -i 's/"SHA_CRUDDY_PANEL": "[^"]*"/"SHA_CRUDDY_PANEL": "${{ steps.sha.outputs.sha }}"/' wrangler.jsonc
+          sed -i 's/"SHA_INFOGRAPHIC_MAKER": "[^"]*"/"SHA_INFOGRAPHIC_MAKER": "${{ steps.sha.outputs.sha }}"/' wrangler.jsonc
+          sed -i 's/"SHA_NAV_BAR": "[^"]*"/"SHA_NAV_BAR": "${{ steps.sha.outputs.sha }}"/' wrangler.jsonc
+          sed -i 's/"SHA_DOCS": "[^"]*"/"SHA_DOCS": "${{ steps.sha.outputs.sha }}"/' wrangler.jsonc
+
+      - name: Commit and push changes
+        run: |
+          cd yume-api
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add wrangler.jsonc
+          git diff --staged --quiet || git commit -m "Auto-update CDN SHA to ${{ steps.sha.outputs.sha }}"
+          git push
+
